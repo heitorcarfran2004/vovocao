@@ -731,7 +731,7 @@ function telaVsl(d) {
   // A barra acompanha o tempo do vídeo. Reserva: se o player não carregar, conta o tempo da página. Teste: ?carga=10
   const ALVO = +URLP.get('carga') || 220;
   const cg = d.querySelector('#cg'), msg = d.querySelector('#msg'), ir = d.querySelector('#ir');
-  let pagina = 0, pronto = false, playerOk = false;
+  let pagina = 0, mostrado = 0, pronto = false, playerOk = false;
   const liberar = () => { if (pronto) return; pronto = true; clearInterval(tick); ir.style.display = 'block'; cg.style.width = '100%'; msg.textContent = 'Diagnóstico pronto.'; enviar('carga_fim', 'diagnostico'); };
   const pl = d.querySelector('vturb-smartplayer');
   pl.addEventListener('player:ready', (ev) => {
@@ -744,8 +744,11 @@ function telaVsl(d) {
     // tempo do vídeo pelo próprio player (currentTime); na prévia muda (inSmartAutoPlay) a barra anda mas não libera
     let t = pagina; try { if (playerOk && typeof pl.currentTime === 'number') t = pl.currentTime; } catch (e) {}
     const previa = playerOk && pl.inSmartAutoPlay;
-    const p = Math.min(97, Math.round(100 * (1 - Math.pow(1 - Math.min(1, t / ALVO), 1.6))));
-    cg.style.width = p + '%'; msg.textContent = msgs[Math.min(msgs.length - 1, Math.floor(Math.min(1, t / ALVO) * msgs.length))];
+    // barra: SEMPRE começa do zero e enche em linha reta com o tempo na página; nunca passa do quanto o vídeo foi assistido
+    // (quem volta e continua de onde parou não vê a barra pular; vídeo pausado = barra parada)
+    mostrado = Math.min(mostrado + 1, playerOk ? Math.max(t, mostrado) : pagina);
+    const x = Math.min(1, mostrado / ALVO), p = Math.min(97, Math.round(100 * x));
+    cg.style.width = p + '%'; msg.textContent = msgs[Math.min(msgs.length - 1, Math.floor(x * msgs.length))];
     if ((t >= ALVO && !previa) || (!playerOk && pagina >= ALVO + 20)) liberar();
   }, 1000);
   ir.onclick = () => { clearInterval(tick); proximo(); };
