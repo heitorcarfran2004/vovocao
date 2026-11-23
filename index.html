@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diagnóstico Vovocão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Quiz de uma coluna, celular primeiro. Motivo da marca: o "radar" de 7 pontas (os 7 sinais). */
+:root{
+  --bg:#F2F6F4; --card:#FFFFFF; --ink:#14201B; --muted:#5A6A63; --line:#D8E2DD; --soft:#E7EFEB;
+  --accent:#0C7563; --accent-ink:#FFFFFF; --accent-soft:#DDF0EA;
+  --at:#C4471B; --at-soft:#FBE6DC;          /* atenção */
+  --ob:#B07A12; --ob-soft:#FBF0D6;          /* observar */
+  --no:#6C7A74; --no-soft:#E9EEEC;          /* não observado */
+  --f-d:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-b:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-b);min-height:100vh;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+/* topo: marca no centro, voltar à esquerda, barra embaixo (como os quizzes que escalam) */
+.topo{max-width:520px;margin:0 auto;padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.marca-linha{position:relative;display:flex;align-items:center;justify-content:center;height:34px}
+.marca{display:inline-flex;align-items:center;gap:7px;font:800 17px/1 var(--f-d);color:var(--ink);letter-spacing:-.01em}
+.marca i{width:26px;height:26px;border-radius:8px;background:var(--accent);display:grid;place-items:center}
+.voltar{position:absolute;left:-6px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--ink);font:600 22px/1 var(--f-b);padding:6px 8px;cursor:pointer}
+.prog{margin-top:8px}
+.prog .ato{font:600 10.5px/1 var(--f-b);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;display:flex;justify-content:space-between}
+.prog .ato span:last-child{color:var(--muted);letter-spacing:.04em}
+.trilha{height:8px;background:var(--soft);border-radius:99px;overflow:hidden}
+.trilha i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .45s ease}
+/* a pergunta fica no meio da tela do celular; telas longas (raça, radar) começam do topo */
+main{max-width:520px;margin:0 auto;min-height:calc(100svh - 120px);display:flex;flex-direction:column;justify-content:center;padding-block:18px 12px}
+main.longa{justify-content:flex-start}
+.tela{animation:entra .35s ease both;width:100%}
+.pergunta h2,.pergunta .sub{text-align:center}
+.ilustra{display:grid;place-items:center;margin:0 auto 14px;width:92px;height:92px;border-radius:50%;background:var(--accent-soft);font-size:48px;line-height:1}
+.ilustra.at{background:var(--at-soft)}
+.ic{flex:none;width:44px;height:44px;border-radius:12px;background:var(--soft);display:grid;place-items:center;font-size:24px;line-height:1;overflow:hidden}
+.ic img{width:100%;height:100%;object-fit:cover}
+.seta{flex:none;margin-left:auto;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;color:var(--muted);font-size:15px}
+.op.on .seta{border-color:var(--accent);color:var(--accent)}
+.checks{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 14px;margin:14px 0 4px;font-size:14.5px;font-weight:600}
+.hero{width:100%;aspect-ratio:16/10;border-radius:18px;overflow:hidden;background:var(--soft);margin:4px 0 6px;display:grid;place-items:center}
+.hero img{width:100%;height:100%;object-fit:cover}
+.sexo{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sexo .op{flex-direction:column;justify-content:center;gap:8px;padding:18px 10px;font-weight:600}
+.sexo svg{width:54px;height:54px}
+.grade .op.raca-card,.grade .op.larga{justify-content:flex-start;text-align:left;gap:10px;padding:8px 10px;min-height:60px}
+.raca-card .ic{width:44px;height:44px;border-radius:50%;font-size:26px}
+@keyframes entra{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.tela,.linha,.ponto,.varredura{animation:none!important;transition:none!important}}
+h1{font:800 clamp(28px,7.4vw,38px)/1.08 var(--f-d);letter-spacing:-.015em;margin:6px 0 12px;text-wrap:balance}
+h2{font:800 clamp(23px,6vw,29px)/1.15 var(--f-d);letter-spacing:-.01em;margin:4px 0 10px;text-wrap:balance}
+.sub{color:var(--muted);font-size:16.5px;margin:0 0 20px}
+.selo{display:inline-flex;align-items:center;gap:8px;font:700 12px/1 var(--f-b);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:8px 12px;border-radius:99px}
+.opcoes{display:flex;flex-direction:column;gap:10px}
+.op{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:15px 16px;font:500 16px/1.35 var(--f-b);color:var(--ink);cursor:pointer;transition:border-color .15s,background .15s,transform .1s}
+.op:hover{border-color:var(--accent)}
+.op:active{transform:scale(.99)}
+.op.on{border-color:var(--accent);background:var(--accent-soft)}
+.op .mk{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center}
+.op.multi .mk{border-radius:6px}
+.op.on .mk{border-color:var(--accent);background:var(--accent)}
+.op.on .mk::after{content:"";width:8px;height:8px;border-radius:2px;background:#fff}
+.grade{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grade .op{padding:13px 12px;font-size:15px;justify-content:center;text-align:center;min-height:56px}
+.grade .op.larga{grid-column:1/-1}
+.btn{display:block;width:100%;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font:700 17px/1.2 var(--f-b);padding:17px 18px;cursor:pointer;margin-top:18px;box-shadow:0 6px 16px -8px rgba(12,117,99,.6)}
+.btn:disabled{opacity:.45;box-shadow:none;cursor:default}
+.campo{width:100%;font:600 20px/1.2 var(--f-b);padding:16px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}
+.campo:focus{outline:none;border-color:var(--accent)}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:2px}
+.sug{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.sug button{border:1.5px solid var(--accent);background:var(--card);color:var(--accent);border-radius:99px;padding:8px 14px;font:600 14px var(--f-b);cursor:pointer}
+.sug button.fraco{border-style:dashed;border-color:var(--line);color:var(--muted)}
+.dados-raca{display:flex;flex-direction:column;gap:10px}
+.dado-raca{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--at);border-radius:12px;padding:12px}
+.dado-raca b{display:block;font:800 16px/1.2 var(--f-d);margin-bottom:4px}
+.dado-raca p{margin:0;font-size:14.5px;line-height:1.45}
+.caixa-raca{grid-column:1/-1;background:var(--card);border:1.5px solid var(--accent);border-radius:14px;padding:12px}
+.caixa-raca .campo{font-size:17px;padding:13px 14px}
+.caixa-raca .dica{margin-top:8px}
+.dica{font-size:13.5px;color:var(--muted);margin-top:10px}
+.idade{display:flex;align-items:center;justify-content:center;gap:18px;margin:18px 0 6px}
+.idade button{width:56px;height:56px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);font:700 26px var(--f-b);color:var(--ink);cursor:pointer}
+.idade output{font:800 64px/1 var(--f-d);min-width:110px;text-align:center}
+.idade small{display:block;font:600 14px var(--f-b);color:var(--muted);margin-top:4px}
+.cartao{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px}
+.grande{font:800 46px/1 var(--f-d);color:var(--accent)}
+.lista{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.lista li{display:flex;gap:10px;align-items:flex-start;background:var(--soft);border-radius:10px;padding:10px 12px;font-size:15px}
+.lista li b{color:var(--at)}
+.nota{font-size:12px;color:var(--muted);margin-top:14px}
+.sabia{font:800 13px/1 var(--f-b);letter-spacing:.12em;text-transform:uppercase;color:var(--at)}
+/* radar */
+.radar-wrap{display:grid;place-items:center;margin:4px 0 12px}
+.radar{width:min(260px,72vw);height:auto}
+.radar.res{width:min(208px,58vw)}
+/* resultado: o sinal novo entra no topo e empurra os anteriores; placar + botão entram acima da lista no fim */
+.sinais .linha{animation:none;opacity:1;transform:none}
+.sinais .linha.nova{animation:desce .45s ease both}
+@keyframes desce{from{opacity:0;max-height:0;padding-block:0;margin-top:-8px;transform:translateY(-10px)}to{opacity:1;max-height:90px;transform:none}}
+.topo-res{opacity:0;max-height:0;overflow:hidden;transition:opacity .45s ease,max-height .5s ease}
+.topo-res.on{opacity:1;max-height:320px}
+.placar2{display:flex;align-items:center;gap:14px;background:var(--card);border:1.5px solid var(--accent);border-radius:14px;padding:12px 16px;margin:2px 0 0}
+.placar2 .num{font:800 38px/1 var(--f-d);white-space:nowrap}
+.placar2 .num span{color:var(--muted);font-size:22px}
+.placar2 p{margin:0;font-size:14px;color:var(--muted)}
+.placar2 p b{color:var(--ink);display:block;font-size:15.5px}
+.topo-res .btn{margin:10px 0 14px}
+.radar .anel{fill:none;stroke:var(--line);stroke-width:1}
+.radar .raio{stroke:var(--line);stroke-width:1}
+.varredura{transform-origin:130px 130px;animation:gira 3.2s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+.ponto{opacity:0;animation:aparece .4s ease forwards}
+@keyframes aparece{to{opacity:1}}
+.sinais{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.linha{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;opacity:0;transform:translateX(-8px);animation:linha .4s ease forwards}
+@keyframes linha{to{opacity:1;transform:none}}
+.linha .nm{font-weight:600}
+.linha .nm small{display:block;font-weight:500;color:var(--muted);font-size:12.5px}
+.pill{flex:none;font:700 12px/1 var(--f-b);padding:7px 10px;border-radius:99px;letter-spacing:.02em}
+.p-at{background:var(--at-soft);color:var(--at)} .p-ob{background:var(--ob-soft);color:var(--ob)} .p-no{background:var(--no-soft);color:var(--no)}
+.placar{text-align:center;margin:18px 0 4px;opacity:0;animation:aparece .5s ease forwards}
+.placar .num{font:800 44px/1 var(--f-d)}
+.placar .num span{color:var(--muted);font-size:28px}
+/* carregamento + vsl */
+.carga{height:14px;background:var(--soft);border-radius:99px;overflow:hidden;margin:14px 0 8px;border:1px solid var(--line)}
+.carga i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#19a588);transition:width .8s linear}
+.etapa-carga{font-size:14px;color:var(--muted);min-height:21px}
+.video{position:relative;aspect-ratio:9/16;max-height:72vh;max-width:100%;margin:12px auto 0;background:#0E1613;border-radius:16px;overflow:hidden;display:grid;place-items:center;color:#cfe2da;text-align:center}
+.video video{width:100%;height:100%;object-fit:cover}
+.video .ph{padding:20px;font-size:14px}
+.rodape{max-width:520px;margin:28px auto 0;font-size:11.5px;color:var(--muted);text-align:center}
+/* ---------- TSL (oferta personalizada) ---------- */
+.tsl{display:flex;flex-direction:column;gap:34px;padding-bottom:84px}
+.tsl section{display:flex;flex-direction:column;gap:12px}
+.tsl .kick{margin-bottom:2px}
+.tsl h2{margin:0}
+.tsl .tit{font:800 clamp(21px,5.6vw,26px)/1.15 var(--f-d);letter-spacing:-.01em;margin:6px 0 2px;text-wrap:balance}
+.tsl .kick{font:700 11.5px/1 var(--f-b);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.perfil{position:relative;overflow:hidden;border-radius:22px;background:linear-gradient(160deg,#0E8470 0%,#0B6B5A 100%);color:#fff;padding:18px;box-shadow:0 18px 36px -22px rgba(12,117,99,.9)}
+.perfil::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.07)}
+.perfil .topo-p{display:flex;gap:14px;align-items:center;position:relative;z-index:1}
+.perfil .foto{flex:none;width:72px;height:72px;border-radius:50%;overflow:hidden;background:#E8F3EF;display:grid;place-items:center;font-size:38px;box-shadow:0 0 0 3px rgba(255,255,255,.9)}
+.perfil .foto img{width:100%;height:100%;object-fit:cover}
+.perfil .nm{font:800 28px/1.05 var(--f-d)}
+.perfil .rc{font-size:14px;opacity:.9;margin-top:3px}
+.perfil .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;position:relative;z-index:1}
+.perfil .tile{background:rgba(255,255,255,.13);border-radius:12px;padding:10px 8px;text-align:center}
+.perfil .tile b{display:block;font:800 20px/1.05 var(--f-d)}
+.perfil .tile span{font-size:11.5px;opacity:.9;line-height:1.25;display:block;margin-top:3px}
+.chips-radar{display:flex;flex-wrap:wrap;gap:6px}
+.compat{display:flex;gap:16px;align-items:center;background:var(--card);border:1.5px solid var(--accent);border-radius:18px;padding:16px}
+.anel-c{flex:none;width:96px;height:96px;position:relative}
+.anel-c svg{width:96px;height:96px;transform:rotate(-90deg)}
+.anel-c b{position:absolute;inset:0;display:grid;place-items:center;font:800 25px/1 var(--f-d);color:var(--accent)}
+.compat .tx b{font:800 17px/1.2 var(--f-d)}
+.compat .tx p{margin:4px 0 0;font-size:14px;color:var(--muted)}
+.checks-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.checks-l li{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:14.5px;line-height:1.35}
+.checks-l li i{flex:none;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-style:normal;font-size:13px;font-weight:800}
+.checks-l.rec li i{background:var(--accent-soft);font-size:15px}
+.checks-l li small{display:block;color:var(--muted);font-size:13px}
+.dor{display:flex;gap:12px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--at);border-radius:14px;padding:13px}
+.dor .e{flex:none;width:44px;height:44px;border-radius:12px;background:var(--at-soft);display:grid;place-items:center;font-size:23px}
+.dor b{display:block;font:800 16px/1.2 var(--f-d)}
+.dor .dado{display:block;margin-top:4px;font-weight:700;color:var(--at);font-size:14.5px;line-height:1.3}
+.dor .ve{display:block;margin-top:5px;font-size:13.5px;color:var(--muted)}
+.dor .marcou{display:inline-block;margin-top:7px;font:700 11.5px/1 var(--f-b);background:var(--at-soft);color:var(--at);padding:6px 9px;border-radius:99px}
+.silencio{background:#14201B;color:#fff;border-radius:18px;padding:18px;text-align:center}
+.silencio .big{font:800 24px/1.15 var(--f-d)}
+.silencio p{margin:8px 0 0;font-size:14.5px;opacity:.85}
+.silencio .n{color:#7FE0C2}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vs .col{border-radius:16px;padding:12px}
+.vs .sem{background:var(--at-soft)} .vs .com{background:var(--accent-soft)}
+.vs h4{margin:0 0 8px;font:800 14px/1.2 var(--f-d)}
+.vs .sem h4{color:var(--at)} .vs .com h4{color:var(--accent)}
+.vs ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;font-size:13.5px;line-height:1.3}
+.cuidados{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cuidado{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.cuidado .e{font-size:24px}
+.cuidado b{display:block;font:800 14.5px/1.2 var(--f-d);margin-top:6px}
+.cuidado span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.3}
+.cuidado.larga{grid-column:1/-1;display:flex;gap:12px;align-items:center}
+.cuidado.larga b{margin-top:0}
+.telas{display:flex;gap:12px;overflow-x:auto;overflow-y:visible;scroll-snap-type:x mandatory;padding:6px 16px 30px;margin:0 -16px -18px;scrollbar-width:none}
+.telas img{flex:none;width:58%;max-width:230px;aspect-ratio:390/797;object-fit:cover;object-position:top;border-radius:22px;border:6px solid #14201B;scroll-snap-align:center;box-shadow:0 10px 18px -12px rgba(0,0,0,.45);background:#fff}
+.oferta-box{background:var(--card);border:2px solid var(--accent);border-radius:22px;padding:18px;text-align:center;box-shadow:0 18px 40px -26px rgba(12,117,99,.8)}
+.oferta-box .de{font-size:14px;color:var(--muted);font-weight:600}
+.oferta-box .preco{font:800 58px/1 var(--f-d);color:var(--accent);letter-spacing:-.03em;margin:6px 0 4px}
+.oferta-box .preco small{font-size:24px;vertical-align:top;margin-right:3px}
+.oferta-box .unico{display:inline-block;font:700 13px/1 var(--f-b);color:var(--accent);background:var(--accent-soft);padding:8px 12px;border-radius:99px}
+.btn-comprar{display:block;text-decoration:none;text-align:center;background:linear-gradient(180deg,#14977F,#0C7563);color:#fff;font:800 18px/1.2 var(--f-b);padding:18px;border-radius:16px;margin-top:14px;box-shadow:0 10px 22px -10px rgba(12,117,99,.9);animation:pulsa 2.2s ease-in-out infinite}
+@keyframes pulsa{50%{transform:scale(1.025)}}
+.seguro{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:12.5px;color:var(--muted);font-weight:600}
+.faq details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.faq summary{font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:10px}
+.faq summary::after{content:"+";color:var(--accent);font-weight:800}
+.faq details[open] summary::after{content:"–"}
+.faq p{margin:8px 0 0;font-size:14.5px;color:var(--muted)}
+.fixo{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:10px max(16px,env(safe-area-inset-left,0px)) calc(10px + env(safe-area-inset-bottom,0px));transform:translateY(110%);transition:transform .3s ease}
+.fixo.on{transform:none}
+.fixo .in{max-width:520px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.fixo .in div{flex:1;font-size:13px;line-height:1.25;color:var(--muted)}
+.fixo .in div b{display:block;color:var(--ink);font:800 16px/1.2 var(--f-d)}
+.fixo a{flex:none;text-decoration:none;background:var(--accent);color:#fff;font:800 15px/1 var(--f-b);padding:14px 18px;border-radius:12px}
+</style>
+</head>
+<body>
+<div class="topo">
+  <div class="marca-linha">
+    <button class="voltar" id="voltar" type="button" aria-label="Voltar" hidden>←</button>
+    <span class="marca"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><ellipse cx="6" cy="9" rx="2.2" ry="2.8"/><ellipse cx="10" cy="5.2" rx="2.2" ry="2.8"/><ellipse cx="14.5" cy="5.2" rx="2.2" ry="2.8"/><ellipse cx="18.5" cy="9" rx="2.2" ry="2.8"/><path d="M12.2 11c-3.4 0-6.4 3.6-6.4 6.3 0 1.9 1.5 2.9 3.2 2.9 1.4 0 2.1-.7 3.2-.7s1.8.7 3.2.7c1.7 0 3.2-1 3.2-2.9 0-2.7-3-6.3-6.4-6.3z"/></svg></i>Vovocão</span>
+  </div>
+  <div class="prog" id="prog" hidden><div class="ato"><span id="atoNome"></span><span id="atoConta"></span></div><div class="trilha"><i id="trilha"></i></div></div>
+</div>
+<main id="app" aria-live="polite"></main>
+<p class="rodape" id="rodape">Este diagnóstico mostra sinais e riscos conhecidos da raça e da idade. Não substitui a consulta com o médico-veterinário.</p>
+
+<script src="dados/racas-quiz.js"></script>
+<script src="dados/racas-todas.js"></script>
+<script src="dados/busca-raca.js"></script>
+<script src="dados/tsl-racas.js"></script>
+<script>
+(function () {
+'use strict';
+// ---------- estado ----------
+const URLP = new URLSearchParams(location.search);
+const V = Math.min(5, Math.max(1, +URLP.get('v') || 1));          // variação da abertura (?v=1..5)
+const sid = (() => { try { let s = sessionStorage.getItem('cid'); if (!s) { s = Math.random().toString(36).slice(2, 10); sessionStorage.setItem('cid', s); } return s; } catch (e) { return Math.random().toString(36).slice(2, 10); } })();
+const st = { nome: '', sexo: 'm', ficha: null, racaRotulo: '', racaOrigem: '', porte: '', idade: 10, resp: {}, multi: {} };
+const F = window.FICHAS;
+const SINAIS = [
+  ['apetite', 'Apetite', 'come, recusa, só na mão'],
+  ['agua', 'Água e xixi', 'quanto bebe, quanto faz'],
+  ['patas', 'Patas e coluna', 'levantar, escorregar, subir'],
+  ['noite', 'Sono, noite e cabeça', 'sono, madrugada, desorientação'],
+  ['boca', 'Boca e dentes', 'hálito, tártaro, gengiva'],
+  ['respiracao', 'Respiração e coração', 'tosse, cansaço, ofegar'],
+  ['caroco', 'Caroços e gengiva', 'caroço novo, gengiva pálida'],
+];
+// ---------- eventos (abandono por etapa) ----------
+function enviar(ev, etapa, dados) {
+  const corpo = JSON.stringify({ sid, t: Date.now(), v: V, ev, etapa, dados: dados || null });
+  try { if (navigator.sendBeacon) navigator.sendBeacon('/api/e', new Blob([corpo], { type: 'application/json' })); else fetch('/api/e', { method: 'POST', body: corpo, keepalive: true }); } catch (e) {}
+}
+// ---------- texto personalizado ----------
+const fem = () => st.sexo === 'f';
+const o = () => fem() ? 'a' : 'o', O = () => fem() ? 'A' : 'O';
+const ele = () => fem() ? 'ela' : 'ele', Ele = () => fem() ? 'Ela' : 'Ele', dele = () => fem() ? 'dela' : 'dele';
+const N = () => st.nome || 'seu cão';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function pers(t) {
+  let r = t.replace(/\bO \{nome\}/g, O() + ' ' + N()).replace(/\bdo \{nome\}/g, 'd' + o() + ' ' + N())
+    .replace(/\bno \{nome\}/g, 'n' + o() + ' ' + N()).replace(/\{nome\}/g, N());
+  if (fem()) r = r.replace(/\bele\b/g, 'ela').replace(/\bpego\b/g, 'pega').replace(/\bdeitado\b/g, 'deitada').replace(/\bapático\b/g, 'apática').replace(/\bestranho\b/g, 'estranha').replace(/\bsonolento\b/g, 'sonolenta').replace(/\bdesorientado\b/g, 'desorientada').replace(/\bpreguiçoso\b/g, 'preguiçosa');
+  return r;
+}
+// ---------- idade humana (tabela por porte da AVMA, estimativa) ----------
+function idadeHumana(a, porte) {
+  const passo = porte === 'grande' ? 6 : porte === 'medio' || porte === 'médio' ? 5 : 4;
+  if (a <= 1) return Math.round(15 * a); if (a <= 2) return Math.round(15 + 9 * (a - 1)); return Math.round(24 + (a - 2) * passo);
+}
+// ---------- opções padrão de sinal ----------
+const SINAL4 = (sinal) => [
+  { e: '😟', t: 'Sim', s: { [sinal]: 'atencao' } }, { e: '🤔', t: 'Às vezes', s: { [sinal]: 'atencao' } },
+  { e: '🙂', t: 'Não', s: { [sinal]: 'observar' } }, { e: '🤷', t: 'Não reparei', s: { [sinal]: 'nao' } }];
+// ícone da opção: foto (se existir em img/) ou emoji
+const icone = (op) => op.img ? `<span class="ic"><img src="${op.img}" alt="" onerror="this.parentNode.textContent='${op.e || '🐶'}'"></span>` : op.e ? `<span class="ic">${op.e}</span>` : '<span class="mk"></span>';
+const ILU_SINAL = { boca: '🦷', respiracao: '❤️', agua: '💧', coluna: '🦴', patas: '🐾', gengiva: '👄', caroco: '🔎', noite: '🌙', apetite: '🍖' };
+const ilustra = (e) => { const x = typeof e.ilu === 'function' ? e.ilu() : e.ilu; return x ? `<div class="ilustra${e.iluAt ? ' at' : ''}" aria-hidden="true">${x}</div>` : ''; };
+const SVG_MACHO = '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="26" cy="38" r="16" fill="none" stroke="#3B8FD1" stroke-width="6"/><path d="M38 26 54 10M42 10h12v12" fill="none" stroke="#3B8FD1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const SVG_FEMEA = '<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="24" r="16" fill="none" stroke="#E0789A" stroke-width="6"/><path d="M32 40v18M23 50h18" fill="none" stroke="#E0789A" stroke-width="6" stroke-linecap="round"/></svg>';
+const temChave = (k) => !!(st.ficha && st.ficha.perguntas.some(p => p.chave === k));
+
+// ---------- as etapas (máx. 30) ----------
+const ATOS = ['Conhecendo', 'A rotina', 'Os sinais da raça', 'Qualidade de vida', 'Resultado'];
+const ABERTURAS = {
+  1: { selo: 'Diagnóstico gratuito · 2 minutos', h: 'Descubra o que a raça do seu cão pede de você agora para ele viver mais e melhor', s: 'Responda sobre a rotina dele e receba o Radar dos 7 sinais silenciosos da idade, os que a maioria dos donos confunde com velhice.' },
+  2: { selo: 'Para cães a partir de 7 anos', h: 'Seu cão já passou dos 7 anos? Faça o diagnóstico gratuito dos 7 sinais silenciosos da idade', s: 'Cada raça envelhece de um jeito. Descubra o que pede atenção no seu agora, antes de virar problema.' },
+  3: { selo: 'Diagnóstico gratuito', h: 'O que pode estar tirando anos do seu cão sem você perceber?', s: 'Pela raça e pela rotina dele: em 2 minutos você sabe o que é da idade e o que é sinal de alerta.' },
+  4: { selo: 'Diagnóstico de longevidade · grátis', h: 'Como o seu cão está envelhecendo?', s: 'Descubra os riscos da raça dele, os sinais que você já pode estar vendo e o que fazer para ele viver mais e com disposição.' },
+  5: { selo: 'Diagnóstico gratuito · 2 minutos', h: 'Mais anos e mais disposição para o seu velhinho começam por aqui', s: 'Descubra o que a raça e a idade dele pedem de você agora.' },
+};
+const RACAS_BOTOES = [['srd', 'Vira-lata (SRD)'], ['shih-tzu', 'Shih Tzu'], ['poodle', 'Poodle'], ['yorkshire', 'Yorkshire'], ['pinscher', 'Pinscher'],
+  ['lulu', 'Lulu da Pomerânia'], ['lhasa', 'Lhasa Apso'], ['dachshund', 'Salsicha'], ['golden', 'Golden'], ['maltes', 'Maltês'], ['pug', 'Pug']];
+
+const E = [
+  // ATO 1
+  { id: 'abertura', ato: 0, tipo: 'abertura' },
+  { id: 'nome', ato: 0, tipo: 'nome' },
+  { id: 'sexo', ato: 0, tipo: 'unica', sexo: true, q: () => `${esc(N())} é macho ou fêmea?`, op: () => [{ t: 'Macho', v: 'm', svg: SVG_MACHO }, { t: 'Fêmea', v: 'f', svg: SVG_FEMEA }], ao: (op) => { st.sexo = op.v; } },
+  { id: 'raca', ato: 0, tipo: 'raca' },
+  { id: 'porte', ato: 0, tipo: 'unica', se: () => st.racaOrigem === 'srd' || st.racaOrigem === 'mistura' || (st.racaOrigem === 'outra' && !st.porte),
+    q: () => `Qual o porte d${o()} ${esc(N())}?`, op: () => [{ t: 'Pequeno (até 10 kg)', v: 'pequeno', img: 'img/porte-pequeno.webp', e: '🐕' }, { t: 'Médio (10 a 25 kg)', v: 'medio', img: 'img/porte-medio.webp', e: '🐕' }, { t: 'Grande (mais de 25 kg)', v: 'grande', img: 'img/porte-grande.webp', e: '🐕‍🦺' }],
+    ao: (op) => { st.porte = op.v; if (st.racaOrigem === 'mistura') st.ficha = montarMistura(); else if (st.racaOrigem === 'srd' || !st.ficha || st.ficha.id.startsWith('srd')) st.ficha = F['srd-' + op.v]; } },
+  { id: 'idade', ato: 0, tipo: 'idade' },
+  { id: 'idade-humana', ato: 0, tipo: 'info', info: telaIdadeHumana },
+  // ATO 2
+  { id: 'porta', ato: 1, tipo: 'unica', ilu: '🚪', q: () => `${O()} ${esc(N())} ainda vem te receber na porta quando você chega?`, op: () => [{ e: '🎉', t: 'Sempre, com festa' }, { e: '🐾', t: 'Às vezes, mais devagar' }, { e: '😔', t: 'Quase nunca' }] },
+  { id: 'sono', ato: 1, tipo: 'unica', ilu: '😴', q: () => `${Ele()} tem dormido mais que antes?`, op: () => [{ e: '😊', t: 'Igual sempre', s: { noite: 'observar' } }, { e: '🥱', t: 'Um pouco mais', s: { noite: 'observar' } }, { e: '💤', t: 'Bem mais, quase o dia todo', s: { noite: 'atencao' } }, { e: '🤷', t: 'Não reparei', s: { noite: 'nao' } }] },
+  { id: 'apetite', ato: 1, tipo: 'unica', ilu: '🍖', q: () => `Como anda o apetite d${o()} ${esc(N())}?`, op: () => [{ e: '😋', t: 'Come bem, como sempre', s: { apetite: 'observar' } }, { e: '😒', t: 'Ficou mais chat' + o() + ' pra comer', s: { apetite: 'atencao' } }, { e: '🥄', t: 'Só come na mão ou com algo misturado', s: { apetite: 'atencao' } }, { e: '🤷', t: 'Não reparei', s: { apetite: 'nao' } }] },
+  { id: 'agua', ato: 1, tipo: 'unica', ilu: '💧', q: () => `E a água e o xixi d${o()} ${esc(N())}?`, op: () => [{ e: '👌', t: 'Normal, como sempre', s: { agua: 'observar' } }, { e: '🚰', t: 'Bebe mais água que antes', s: { agua: 'atencao' } }, { e: '💦', t: 'Faz mais xixi, ou já fez dormindo', s: { agua: 'atencao' } }, { e: '🤷', t: 'Não reparei', s: { agua: 'nao' } }] },
+  { id: 'patas', ato: 1, tipo: 'multi', ilu: '🐾', q: () => `Você já notou alguma destas n${o()} ${esc(N())}?`, sub: 'Pode marcar mais de uma.',
+    op: () => [{ e: '🦵', t: 'As patinhas de trás tremem' }, { e: '⛸️', t: 'Escorrega no piso' }, { e: '🐢', t: 'Demora pra levantar' }, { e: '🛋️', t: 'Não sobe mais no sofá ou na cama' }, { e: '✅', t: 'Nenhuma destas', so: true, s: { patas: 'observar' } }, { e: '🤷', t: 'Não reparei', so: true, s: { patas: 'nao' } }],
+    efeito: (marc) => marc.some(m => !m.so) ? { patas: 'atencao' } : (marc[0] && marc[0].s) || {} },
+  { id: 'consulta', ato: 1, tipo: 'unica', ilu: '🩺', q: () => `Quando foi a última consulta d${o()} ${esc(N())} no veterinário?`, op: () => [{ e: '🗓️', t: 'Menos de 6 meses' }, { e: '📅', t: 'Entre 6 meses e 1 ano' }, { e: '⏳', t: 'Mais de 1 ano' }, { e: '🤔', t: 'Não lembro' }] },
+  // ATO 3
+  { id: 'sabia-raca', ato: 2, tipo: 'info', info: telaSabiaRaca },
+  { id: 'raca-1', ato: 2, tipo: 'unica', ilu: () => ILU_SINAL[st.ficha.perguntas[0].chave] || '🔎', se: () => st.ficha && st.ficha.perguntas[0], q: () => esc(pers(st.ficha.perguntas[0].texto)), op: () => SINAL4(st.ficha.perguntas[0].sinal) },
+  { id: 'raca-2', ato: 2, tipo: 'unica', ilu: () => ILU_SINAL[st.ficha.perguntas[1].chave] || '🔎', se: () => st.ficha && st.ficha.perguntas[1], q: () => esc(pers(st.ficha.perguntas[1].texto)), op: () => SINAL4(st.ficha.perguntas[1].sinal) },
+  { id: 'noite', ato: 2, tipo: 'unica', ilu: '🌙', se: () => !temChave('noite'), q: () => `${O()} ${esc(N())} anda pela casa de madrugada, fica girando ou para olhando a parede?`, op: () => SINAL4('noite') },
+  { id: 'respiracao', ato: 2, tipo: 'unica', ilu: '❤️', se: () => !temChave('respiracao'), q: () => `${Ele()} ofega mesmo deitad${o()}, ou tosse à noite?`, op: () => SINAL4('respiracao') },
+  { id: 'caroco', ato: 2, tipo: 'unica', ilu: '🔎', se: () => !temChave('caroco'), q: () => `Apareceu algum caroço ou verruga nova n${o()} ${esc(N())} nos últimos meses?`, op: () => SINAL4('caroco') },
+  { id: 'gengiva', ato: 2, tipo: 'unica', ilu: '👄', se: () => !temChave('gengiva'), q: () => `Já olhou a cor da gengiva d${o()} ${esc(N())}? Como está?`, op: () => [{ e: '🌸', t: 'Rosadinha', s: { caroco: 'observar' } }, { e: '🤍', t: 'Mais clara, meio pálida', s: { caroco: 'atencao' } }, { e: '👀', t: 'Nunca olhei', s: { caroco: 'nao' } }] },
+  { id: 'remedio', ato: 2, tipo: 'unica', ilu: '💊', q: () => `Você já deu remédio de gente pr${o()} ${esc(N())} (para dor, febre ou enjoo)?`, op: () => [{ e: '💊', t: 'Já dei' }, { e: '🤔', t: 'Já pensei em dar' }, { e: '🚫', t: 'Nunca' }] },
+  // ATO 4
+  { id: 'animo', ato: 3, tipo: 'unica', ilu: '🎾', q: () => `Hoje, ${o()} ${esc(N())} está mais para...`, op: () => [{ e: '🎾', t: `${fem() ? 'A mesma bagunceira' : 'O mesmo bagunceiro'} de sempre` }, { e: '🐕', t: 'Mais quiet' + o() + ', mas ainda brinca' }, { e: '🛏️', t: 'Quase só dorme e fica no canto', s: { noite: 'atencao' } }] },
+  { id: 'saudade', ato: 3, tipo: 'multi', ilu: '💭', q: () => `Do que você mais sente falta que ${o()} ${esc(N())} fazia?`, sub: 'Pode marcar mais de uma.',
+    op: () => [{ e: '🎾', t: 'Brincar de bolinha ou com brinquedo' }, { e: '🔔', t: 'Latir pra campainha' }, { e: '🏃', t: 'Correr pra me receber' }, { e: '🌳', t: 'Passeios mais longos' }, { e: '🛏️', t: 'Subir na cama ou no sofá' }, { e: '💚', t: `Nada, ${ele()} está igual`, so: true }] },
+  { id: 'sabia-qualidade', ato: 3, tipo: 'info', info: telaQualidade },
+  { id: 'da-idade', ato: 3, tipo: 'unica', ilu: '🗣️', q: () => `Alguém já te disse que "é da idade, não tem o que fazer"?`, op: () => [{ e: '🗣️', t: 'Já, mais de uma vez' }, { e: '🩺', t: 'Já, até o veterinário' }, { e: '🙅', t: 'Nunca' }] },
+  { id: 'madrugada', ato: 3, tipo: 'unica', ilu: '🌙', q: () => `Se ${o()} ${esc(N())} passasse mal às 2 da manhã de um domingo, você saberia se dá pra esperar ou se é emergência?`, op: () => [{ e: '👍', t: 'Saberia' }, { e: '😬', t: 'Acho que não' }, { e: '😰', t: 'Não faço ideia' }] },
+  { id: 'sinais-todos', ato: 3, tipo: 'unica', ilu: '💔', iluAt: true, q: () => `Se ${o()} ${esc(N())} partisse amanhã, você sentiria que viu todos os sinais?`, op: () => [{ e: '💚', t: 'Sim' }, { e: '🤔', t: 'Não sei' }, { e: '😢', t: 'Não' }] },
+  { id: 'desejo', ato: 3, tipo: 'unica', ilu: '🐶', q: () => `O que você mais quer viver com ${o()} ${esc(N())} nos próximos anos?`, op: () => [{ e: '🌳', t: 'Muitos passeios ainda' }, { e: '🕊️', t: `Que ${ele()} não sofra` }, { e: '🎂', t: 'Que chegue aos 15, 16, 17 anos' }, { e: '🎾', t: `Ver ${ele()} brincando de novo` }] },
+  // RESULTADO
+  { id: 'radar', ato: 4, tipo: 'radar' },
+  { id: 'diagnostico', ato: 4, tipo: 'vsl' },
+  { id: 'oferta', ato: 4, tipo: 'oferta' },
+];
+
+// ---------- navegação ----------
+const app = document.getElementById('app');
+let pos = 0; const pilha = [];
+const visivel = (e) => !e.se || !!e.se();
+function proximo() { pilha.push(pos); let i = pos + 1; while (i < E.length && !visivel(E[i])) i++; pos = i; mostrar(); }
+document.getElementById('voltar').onclick = () => { if (pilha.length) { pos = pilha.pop(); mostrar(); } };
+function progresso() {
+  const e = E[pos], vis = E.filter(visivel).filter(x => x.tipo !== 'abertura' && x.ato < 4);
+  const i = vis.indexOf(e);
+  document.getElementById('prog').hidden = e.tipo === 'abertura' || e.tipo === 'vsl' || e.tipo === 'oferta'; // na VSL a barra de carregamento já basta
+  const vb = document.getElementById('voltar');
+  vb.hidden = e.tipo === 'abertura' || e.ato === 4;
+  document.getElementById('rodape').hidden = !(e.tipo === 'abertura' || e.ato === 4);
+  app.classList.toggle('longa', ['raca', 'radar', 'vsl', 'oferta'].includes(e.tipo));
+  document.getElementById('atoNome').textContent = ATOS[e.ato];
+  document.getElementById('atoConta').textContent = e.ato < 4 ? `${e.ato + 1} de 4` : '';
+  document.getElementById('trilha').style.width = (e.ato === 4 ? 100 : Math.max(4, Math.round(100 * (i + 1) / (vis.length + 1)))) + '%';
+}
+function mostrar() {
+  const e = E[pos]; progresso(); window.scrollTo(0, 0);
+  enviar('etapa', e.id);
+  const r = { abertura: telaAbertura, nome: telaNome, unica: telaUnica, multi: telaMulti, raca: telaRaca, idade: telaIdade, info: telaInfo, radar: telaRadar, vsl: telaVsl, oferta: telaOferta }[e.tipo];
+  app.innerHTML = ''; const div = document.createElement('div'); div.className = 'tela'; app.appendChild(div); r(div, e);
+}
+function aplicar(s) { if (s) Object.entries(s).forEach(([k, v]) => { st.resp['sinal:' + k + ':' + E[pos].id] = v; }); }
+
+// ---------- telas ----------
+function telaAbertura(d) {
+  const a = ABERTURAS[V];
+  d.innerHTML = `<div style="text-align:center">
+    <span class="selo">${a.selo}</span>
+    <h1>${a.h}</h1>
+    <div class="hero"><img src="img/hero.webp" alt="Cães idosos de várias raças" onerror="this.parentNode.innerHTML='<span style=&quot;font-size:64px&quot;>🐶🐕🐩</span>'"></div>
+    <div class="checks"><span>✅ Teste gratuito</span><span>✅ Leva 2 minutos</span><span>✅ Resultado na hora</span></div>
+    <p class="sub" style="margin-top:10px">${a.s}</p>
+    <button class="btn" id="ir" type="button">Começar o diagnóstico gratuito</button>
+    <p class="dica">Baseado em estudos com mais de 40 mil cães</p></div>`;
+  d.querySelector('#ir').onclick = () => { enviar('inicio', 'abertura', { v: V }); proximo(); };
+}
+function telaNome(d) {
+  d.classList.add('pergunta');
+  d.innerHTML = `<div class="ilustra" aria-hidden="true">🐶</div><h2>Como se chama o seu cãozinho?</h2><p class="sub">Vamos usar o nome dele no diagnóstico.</p>
+    <input class="campo" id="n" type="text" autocomplete="off" maxlength="24" placeholder="Ex.: Thor, Mel, Pipoca" value="${esc(st.nome)}">
+    <button class="btn" id="ir" type="button" disabled>Continuar</button>`;
+  const i = d.querySelector('#n'), b = d.querySelector('#ir');
+  const ok = () => { b.disabled = i.value.trim().length < 2; };
+  i.oninput = ok; ok(); setTimeout(() => i.focus(), 50);
+  const ir = () => { if (b.disabled) return; st.nome = i.value.trim().replace(/\s+/g, ' ').replace(/^./, c => c.toUpperCase()); proximo(); };
+  b.onclick = ir; i.onkeydown = (ev) => { if (ev.key === 'Enter') ir(); };
+}
+function telaUnica(d, e) {
+  d.classList.add('pergunta');
+  d.innerHTML = `${ilustra(e)}<h2>${e.q()}</h2>${e.sub ? `<p class="sub">${e.sub}</p>` : '<div style="height:10px"></div>'}<div class="${e.sexo ? 'sexo' : 'opcoes'}"></div>`;
+  const box = d.querySelector(e.sexo ? '.sexo' : '.opcoes');
+  e.op().forEach((op) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'op';
+    b.innerHTML = op.svg ? `${op.svg}<span>${esc(op.t)}</span>` : `${icone(op)}<span>${esc(op.t)}</span><span class="seta" aria-hidden="true">›</span>`;
+    if (st.resp[e.id] === op.t) b.classList.add('on');
+    b.onclick = () => {
+      box.querySelectorAll('.op').forEach(x => x.classList.remove('on')); b.classList.add('on');
+      st.resp[e.id] = op.t; Object.keys(st.resp).filter(k => k.endsWith(':' + e.id) && k.startsWith('sinal:')).forEach(k => delete st.resp[k]);
+      aplicar(op.s); if (e.ao) e.ao(op); enviar('resposta', e.id, { r: op.t });
+      setTimeout(proximo, 260);
+    };
+    box.appendChild(b);
+  });
+}
+function telaMulti(d, e) {
+  d.classList.add('pergunta');
+  d.innerHTML = `${ilustra(e)}<h2>${e.q()}</h2><p class="sub">${e.sub || ''}</p><div class="opcoes"></div><button class="btn" id="ir" type="button" disabled>Continuar</button>`;
+  const box = d.querySelector('.opcoes'), b = d.querySelector('#ir'); const ops = e.op(); const marc = new Set(st.multi[e.id] || []);
+  const pintar = () => { box.querySelectorAll('.op').forEach((x, i) => x.classList.toggle('on', marc.has(i))); b.disabled = !marc.size; };
+  ops.forEach((op, i) => {
+    const x = document.createElement('button'); x.type = 'button'; x.className = 'op multi'; x.innerHTML = `${icone(op)}<span>${esc(op.t)}</span><span class="mk" style="margin-left:auto"></span>`;
+    x.onclick = () => { if (op.so) { marc.clear(); marc.add(i); } else { ops.forEach((o2, j) => { if (o2.so) marc.delete(j); }); marc.has(i) ? marc.delete(i) : marc.add(i); } pintar(); };
+    box.appendChild(x);
+  });
+  pintar();
+  b.onclick = () => {
+    const sel = [...marc].map(i => ops[i]); st.multi[e.id] = [...marc]; st.resp[e.id] = sel.map(s => s.t).join(' | ');
+    Object.keys(st.resp).filter(k => k.endsWith(':' + e.id) && k.startsWith('sinal:')).forEach(k => delete st.resp[k]);
+    if (e.efeito) aplicar(e.efeito(sel)); enviar('resposta', e.id, { r: st.resp[e.id] }); proximo();
+  };
+}
+// ---------- mistura de duas raças ----------
+// Junta as fichas: riscos das duas, 1 pergunta de cada, doenças intercaladas. O porte é perguntado (mistura varia).
+const fichaDe = (m) => (m && m.ficha && m.ficha !== 'SRD' && F[m.ficha]) ? F[m.ficha] : F['srd-' + (st.porte || m && m.porte || 'medio')];
+function montarMistura() {
+  const [A, B] = st.mistura.map(fichaDe);
+  const uniq = (arr) => arr.filter((x, i) => x && arr.indexOf(x) === i);
+  const doencas = uniq([A.doencas[0], B.doencas[0], A.doencas[1], B.doencas[1], A.doencas[2], B.doencas[2]]).slice(0, 3);
+  const perguntas = [];
+  for (const p of [A.perguntas[0], B.perguntas[0], A.perguntas[1], B.perguntas[1]]) if (p && perguntas.length < 2 && !perguntas.some(q => q.chave === p.chave)) perguntas.push(p);
+  const vive = Math.round(((+A.vive || 12) + (+B.vive || 12)) / 2 * 10) / 10;
+  return { id: 'mix', mix: true, ids: [A.id, B.id], nome: st.racaRotulo, curto: st.racaRotulo, porte: st.porte || 'medio', vive, idosoAos: Math.min(A.idosoAos, B.idosoAos),
+    gancho: (A.id.startsWith('srd') ? B : A).gancho, doencas,
+    // o dado principal de cada raça, com o nome dela (tela "Você sabia?" da mistura)
+    dados: st.mistura.map((m, i) => ({ nome: m.ficha === 'SRD' ? 'Vira-lata' : m.nome.replace(/\s*\(.*\)$/, ''), txt: [A, B][i].gancho, foto: [A, B][i].id.replace(/^srd-.*/, 'srd') })), riscos: uniq([...(A.riscos || []).slice(0, 2), ...(B.riscos || []).slice(0, 2)]), perguntas };
+}
+// "shitzu com poodle", "pug + beagle", "mistura de lhasa e poodle" -> duas raças
+function detectarMistura(texto) {
+  const partes = texto.toLowerCase().replace(/mistura(do|da)? (de )?|mesti[cç]o (de )?|cruza(do|da|mento)? (de )?/g, '').split(/\s+(?:com|e|x|\+|mais)\s+|\s*\+\s*|\s*\/\s*/).map(s => s.trim()).filter(s => s.length >= 2);
+  if (partes.length !== 2) return null;
+  const [a, b] = partes.map(buscarRaca);
+  return a.raca && b.raca && a.raca.nome !== b.raca.nome ? [a.raca, b.raca] : null;
+}
+function escolherMistura(par, origemTxt) {
+  st.racaOrigem = 'mistura'; st.mistura = par; st.porte = '';
+  st.racaRotulo = par.map(r => r.ficha === 'SRD' ? 'Vira-lata' : r.nome.replace(/\s*\(.*\)$/, '')).join(' + ');
+  st.ficha = montarMistura();
+  enviar('raca_mistura', 'raca', { a: par[0].nome, b: par[1].nome, texto: origemTxt || null });
+  proximo();
+}
+// caixa de busca reaproveitável: digita, aparecem as raças; tocar numa já escolhe (sem botão Continuar)
+function caixaBusca(box, { placeholder, aoEscolher, aoMistura, aoTexto }) {
+  box.innerHTML = `<input class="campo" type="text" autocomplete="off" maxlength="40" placeholder="${placeholder}">
+    <div class="sug"></div><p class="dica">Escreva do seu jeito e toque na raça certa.</p>`;
+  const inp = box.querySelector('input'), sug = box.querySelector('.sug');
+  const chip = (txt, cls, fn) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; if (cls) b.className = cls; b.onclick = fn; sug.appendChild(b); };
+  const montar = () => {
+    sug.innerHTML = ''; const t = inp.value.trim(); if (t.length < 2) return;
+    const r = buscarRaca(t), mist = aoMistura && detectarMistura(t);
+    if (mist) chip('Mistura: ' + mist.map(x => x.nome.replace(/\s*\(.*\)$/, '')).join(' + '), '', () => aoMistura(mist, t));
+    // junta: as que casam pelo jeito de escrever (com erro) + as que começam com o que foi digitado (já na 2ª letra)
+    const lista = []; const ja = new Set();
+    // até 3 letras vale o começo do nome ("do" -> Dobermann, Dogo...); da 4ª em diante, o casamento que entende erro vem primeiro
+    const inicio = sugerirPorInicio(t, 4), curto = t.replace(/\s/g, '').length <= 3;
+    (curto ? (inicio.length ? inicio : r.sugestoes) : [...r.sugestoes, ...inicio]).forEach(s => { if (!ja.has(s.nome) && lista.length < 4) { ja.add(s.nome); lista.push(s); } });
+    r.sugestoes = lista;
+    lista.forEach(s => chip(s.nome, '', () => aoEscolher(s, t, r, s.inicio ? 'escolheu_pelo_inicio' : 'escolheu_sugestao')));
+    if (aoTexto) chip(r.sugestoes.length ? `Não é nenhuma: seguir com "${t}"` : `Seguir com "${t}"`, 'fraco', () => aoTexto(t, r));
+  };
+  inp.oninput = montar;
+  inp.onkeydown = (ev) => {
+    if (ev.key !== 'Enter') return; const t = inp.value.trim(); if (t.length < 2) return;
+    const r = buscarRaca(t), mist = aoMistura && detectarMistura(t);
+    if (mist) aoMistura(mist, t); else if (r.raca) aoEscolher(r.raca, t, r, r.metodo); else if (aoTexto) aoTexto(t, r);
+  };
+  setTimeout(() => inp.focus(), 50);
+}
+function telaRaca(d) {
+  d.classList.add('pergunta');
+  d.innerHTML = `<h2>Qual a raça d${o()} ${esc(N())}?</h2><div style="height:10px"></div><div class="grade"></div>`;
+  const g = d.querySelector('.grade');
+  const botaoRaca = (id, rot) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'op raca-card' + (id === 'srd' ? ' larga' : '');
+    b.innerHTML = `${icone({ img: 'img/raca-' + id + '.webp', e: id === 'poodle' ? '🐩' : id === 'srd' ? '🐕' : '🐶' })}<span>${esc(rot)}</span>`;
+    b.onclick = () => {
+      st.racaOrigem = id === 'srd' ? 'srd' : 'botao'; st.racaRotulo = rot; st.mistura = null;
+      if (id === 'srd') { st.ficha = null; st.porte = ''; } else { st.ficha = F[id]; st.porte = F[id].porte; }
+      enviar('resposta', 'raca', { r: rot, origem: st.racaOrigem }); proximo();
+    };
+    g.appendChild(b);
+  };
+  const botaoAbre = (ic, rot) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'op larga'; b.innerHTML = `<span class="ic">${ic}</span><span>${rot}</span>`; g.appendChild(b);
+    const box = document.createElement('div'); box.className = 'caixa-raca'; box.hidden = true; g.appendChild(box); return [b, box]; };
+
+  // vira-lata e as 10 raças; por último "outra raça" e, embaixo dela, a mistura
+  RACAS_BOTOES.forEach(([id, rot]) => botaoRaca(id, rot));
+  const [outraBtn, outraBox] = botaoAbre('✏️', 'Outra raça (digitar)');
+  const [mixBtn, mixBox] = botaoAbre('🧬', 'Mistura de 2 raças');
+
+  // rastreio do "outra": o que a pessoa digitou, com o que casou e como (relatório em ferramentas/racas-digitadas.cjs)
+  const registrar = (texto, r, casou, metodo) => enviar('raca_digitada', 'raca', { texto, chave: r.chave, casou: casou ? casou.nome : null, ficha: casou ? casou.ficha : null, metodo, nota: r.nota, sugestoes: r.sugestoes.map(s => s.nome) });
+  const usarRaca = (casou, texto) => {
+    st.racaOrigem = 'outra'; st.mistura = null;
+    if (casou && casou.ficha === 'SRD') { st.racaOrigem = 'srd'; st.racaRotulo = 'Vira-lata (SRD)'; st.ficha = null; st.porte = ''; }
+    else if (casou && casou.ficha && F[casou.ficha]) { st.racaRotulo = casou.nome; st.ficha = F[casou.ficha]; st.porte = F[casou.ficha].porte; }
+    else if (casou) { st.racaRotulo = casou.nome; st.porte = casou.porte === 'medio' ? 'medio' : casou.porte; st.ficha = F['srd-' + (st.porte || 'medio')]; }
+    else { st.racaRotulo = texto; st.ficha = null; st.porte = ''; }
+    proximo();
+  };
+  outraBtn.onclick = () => {
+    mixBox.hidden = true; mixBtn.classList.remove('on'); outraBox.hidden = false; outraBtn.classList.add('on');
+    caixaBusca(outraBox, {
+      placeholder: 'Digite a raça',
+      aoEscolher: (s, t, r, met) => { registrar(t, r, s, met); usarRaca(s, t); },
+      aoMistura: (par, t) => { registrar(t, buscarRaca(t), null, 'mistura'); escolherMistura(par, t); },
+      aoTexto: (t, r) => { registrar(t, r, null, 'seguiu_com_texto'); usarRaca(null, t); },
+    });
+  };
+  mixBtn.onclick = () => {
+    outraBox.hidden = true; outraBtn.classList.remove('on'); mixBox.hidden = false; mixBtn.classList.add('on');
+    const par = [];
+    const etapa = () => {
+      const qual = par.length ? '2ª raça' : '1ª raça';
+      mixBox.innerHTML = `<p class="dica" style="margin:0 0 8px">${par.length ? `1ª: <b>${esc(par[0].nome)}</b>. Agora a 2ª raça:` : 'Qual a 1ª raça da mistura?'}</p><div class="sug" id="rapidas"></div><div id="buscaMix" style="margin-top:8px"></div>`;
+      const rap = mixBox.querySelector('#rapidas');
+      // atalhos: vira-lata + os 10 botões
+      [['SRD', 'Vira-lata']].concat(RACAS_BOTOES.slice(1).map(([id, rot]) => [id, rot])).forEach(([id, rot]) => {
+        if (par[0] && (par[0].ficha === id || (id === 'SRD' && par[0].ficha === 'SRD'))) return;
+        const b = document.createElement('button'); b.type = 'button'; b.textContent = rot;
+        b.onclick = () => escolher({ nome: id === 'SRD' ? 'Vira-lata (SRD)' : rot, ficha: id, porte: id === 'SRD' ? '' : F[id].porte });
+        rap.appendChild(b);
+      });
+      caixaBusca(mixBox.querySelector('#buscaMix'), { placeholder: 'ou digite a ' + qual, aoEscolher: (s) => escolher(s) });
+    };
+    const escolher = (r) => { par.push(r); if (par.length === 2) escolherMistura(par); else etapa(); };
+    etapa();
+  };
+}
+function telaIdade(d) {
+  d.classList.add('pergunta');
+  d.innerHTML = `<div class="ilustra" aria-hidden="true">🎂</div><h2>Quantos aninhos ${o()} ${esc(N())} tem?</h2><p class="sub">Se não souber ao certo, chute o mais perto.</p>
+    <div class="idade"><button type="button" id="menos" aria-label="Menos um ano">–</button><div style="text-align:center"><output id="v">${st.idade}</output><small>anos</small></div><button type="button" id="mais" aria-label="Mais um ano">+</button></div>
+    <button class="btn" id="ir" type="button">Continuar</button>`;
+  const v = d.querySelector('#v'); const set = (n) => { st.idade = Math.min(25, Math.max(1, n)); v.textContent = st.idade; };
+  d.querySelector('#menos').onclick = () => set(st.idade - 1); d.querySelector('#mais').onclick = () => set(st.idade + 1);
+  d.querySelector('#ir').onclick = () => { enviar('resposta', 'idade', { r: st.idade }); proximo(); };
+}
+function telaInfo(d, e) { d.innerHTML = e.info() + `<button class="btn" id="ir" type="button">Continuar</button>`; d.querySelector('#ir').onclick = proximo; }
+const porteTxt = () => (st.porte === 'medio' ? 'médio' : st.porte || 'médio');
+function nomeRaca() { return st.racaOrigem === 'srd' || !st.ficha ? 'vira-lata de porte ' + porteTxt() : (st.racaRotulo || st.ficha.curto); }
+// raça digitada que não tem ficha própria: os dados são do porte, então o texto fala do porte
+const usaPorte = () => st.racaOrigem === 'outra' && st.ficha && st.ficha.id.startsWith('srd');
+function grupoRaca() { return usaPorte() ? `cães de porte ${porteTxt()} como ${o()} ${N()}` : nomeRaca(); }
+function telaIdadeHumana() {
+  const porte = st.porte || (st.ficha && st.ficha.porte) || 'medio', h = idadeHumana(st.idade, porte);
+  const f = st.ficha || F['srd-' + porte] || F['srd-medio'];
+  const fase = st.idade >= f.idosoAos ? `já está na fase idosa${st.racaOrigem === 'botao' ? ' da raça' : ''}` : st.idade >= f.idosoAos - 2 ? 'está entrando na fase idosa' : `ainda é adult${o()}, mas a fase idosa começa por volta dos ${f.idosoAos} anos`;
+  return `<div style="text-align:center"><span class="selo">🔓 Desbloqueado</span></div>
+    <h2 style="text-align:center;margin-top:12px">${esc(N())} tem cerca de</h2>
+    <div class="cartao" style="text-align:center"><div class="grande">${h} anos</div><div style="color:var(--muted);font-weight:600;margin-top:6px">em idade humana</div></div>
+    <p class="sub" style="margin-top:16px">${usaPorte() ? `Cães de porte ${porteTxt()} vivem` : esc(nomeRaca()).replace(/^./, c => c.toUpperCase()) + ' vive'} em média <b>${String(f.vive).replace('.', ',')} anos</b>. ${O()} ${esc(N())} ${fase}: é nessa fase que os sinais pequenos começam a aparecer, e cada ano ${dele()} vale vários dos nossos.</p>
+    <p class="nota">Estimativas: tabela de idade por porte da Associação Veterinária Americana e estudo britânico de expectativa de vida com 155 raças (2024).</p>`;
+}
+function telaSabiaRaca() {
+  const f = st.ficha || F['srd-' + (st.porte || 'medio')];
+  const lista = f.doencas.map(x => `<li><b>•</b><span>${esc(x)}</span></li>`).join('');
+  const fotoId = (st.racaOrigem === 'srd' || usaPorte() || !st.ficha) ? 'srd' : st.ficha.mix ? st.ficha.ids[0].replace(/^srd-.*/, 'srd') : st.ficha.id;
+  if (f.mix && f.dados) {
+    // mistura: o dado principal de cada uma das duas raças, com o nome e a foto dela
+    const blocos = f.dados.map(dd => `<div class="dado-raca">${icone({ img: 'img/raca-' + dd.foto + '.webp', e: '🐶' }).replace('class="ic"', 'class="ic" style="width:54px;height:54px;border-radius:50%;background:none"')}<div><b>${esc(dd.nome)}</b><p>${esc(dd.txt)}</p></div></div>`).join('');
+    return `<div style="text-align:center"><span class="sabia">Você sabia?</span></div>
+      <h2 style="text-align:center;font-size:clamp(20px,5.2vw,25px)">${O()} ${esc(N())} é mistura de ${esc(st.racaRotulo.replace(' + ', ' com '))}. Cada lado traz os seus riscos:</h2>
+      <div class="dados-raca">${blocos}</div>
+      <div class="cartao" style="margin-top:12px"><div style="font-weight:700">Os problemas mais comuns nessa mistura, na idade d${o()} ${esc(N())}:</div><ul class="lista">${lista}</ul></div>
+      <p class="sub" style="margin-top:14px">As próximas perguntas são sobre os sinais que mais aparecem cedo nesses casos.</p>`;
+  }
+  return `<div class="ilustra at" aria-hidden="true">${st.racaOrigem ? icone({ img: 'img/raca-' + fotoId + '.webp', e: '💡' }).replace('class="ic"', 'class="ic" style="width:92px;height:92px;border-radius:50%;font-size:48px;background:none"') : '💡'}</div>
+    <div style="text-align:center"><span class="sabia">Você sabia?</span></div>
+    <h2 style="text-align:center;font-size:clamp(20px,5.2vw,25px)">${esc(f.gancho)}</h2>
+    <div class="cartao"><div style="font-weight:700">Os problemas mais comuns em ${esc(grupoRaca())} na idade d${o()} ${esc(N())}:</div><ul class="lista">${lista}</ul></div>
+    <p class="sub" style="margin-top:14px">As próximas perguntas são sobre os sinais que mais aparecem cedo nesses casos.</p>`;
+}
+function telaQualidade() {
+  return `<div class="ilustra" aria-hidden="true">🏃</div><div style="text-align:center"><span class="sabia" style="color:var(--accent)">Você sabia?</span></div>
+    <h2 style="text-align:center;font-size:clamp(20px,5.2vw,25px)">No maior estudo do mundo sobre o envelhecimento dos cães, com mais de 40 mil cães, os mais ativos e curiosos viveram mais.</h2>
+    <p class="sub">Velhice não precisa ser só cama e silêncio. Muito do que o dono chama de "preguiça da idade" tem causa, e tem o que fazer para ${o()} ${esc(N())} voltar a ter dias bons.</p>
+    <p class="nota">Dog Aging Project, Universidade de Washington, 2026.</p>`;
+}
+
+// ---------- radar ----------
+function calcularRadar() {
+  const ordem = { atencao: 3, observar: 2, nao: 1 };
+  const res = {}; SINAIS.forEach(([k]) => res[k] = { st: 'nao', raca: false });
+  Object.entries(st.resp).forEach(([k, v]) => { if (!k.startsWith('sinal:')) return; const s = k.split(':')[1]; if (res[s] && ordem[v] > ordem[res[s].st]) res[s].st = v; });
+  const f = st.ficha || F['srd-' + (st.porte || 'medio')];
+  (f.riscos || []).forEach(s => { if (res[s] && res[s].st === 'observar') { res[s].st = 'atencao'; res[s].raca = true; } });
+  if (!Object.values(res).some(r => r.st === 'atencao')) { const s = (f.riscos || [])[0] || 'boca'; res[s].st = 'atencao'; res[s].raca = true; }
+  const acompanha = Object.values(res).filter(r => r.st !== 'nao').length;
+  return { res, acompanha };
+}
+function radarSvg(enfeite, res) {
+  const cx = 130, cy = 130, R = 100; const pts = (r) => SINAIS.map((_, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / 7; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; });
+  const poly = (r) => pts(r).map(p => p.map(n => n.toFixed(1)).join(',')).join(' ');
+  const cor = { atencao: 'var(--at)', observar: 'var(--ob)', nao: 'var(--no)' };
+  const pontos = res ? SINAIS.map(([k], i) => { const r = res[k].st === 'atencao' ? R * .95 : res[k].st === 'observar' ? R * .65 : R * .3; const a = -Math.PI / 2 + i * 2 * Math.PI / 7; return `<circle class="ponto" style="animation-delay:${.35 + i * .45}s" cx="${(cx + r * Math.cos(a)).toFixed(1)}" cy="${(cy + r * Math.sin(a)).toFixed(1)}" r="9" fill="${cor[res[k].st]}"/>`; }).join('') : '';
+  return `<div class="radar-wrap" ${enfeite ? 'style="margin-bottom:6px"' : ''}><svg class="radar${res ? ' res' : ''}" viewBox="0 0 260 260" role="img" aria-label="Radar dos 7 sinais" style="${enfeite ? 'width:150px' : ''}">
+    <polygon class="anel" points="${poly(R)}"/><polygon class="anel" points="${poly(R * .65)}"/><polygon class="anel" points="${poly(R * .3)}"/>
+    ${pts(R).map(p => `<line class="raio" x1="${cx}" y1="${cy}" x2="${p[0].toFixed(1)}" y2="${p[1].toFixed(1)}"/>`).join('')}
+    <g class="varredura"><path d="M${cx},${cy} L${cx},${cy - R} A${R},${R} 0 0,1 ${(cx + R * Math.sin(Math.PI / 4)).toFixed(1)},${(cy - R * Math.cos(Math.PI / 4)).toFixed(1)} Z" fill="var(--accent)" opacity=".13"/></g>
+    ${pontos}<circle cx="${cx}" cy="${cy}" r="4" fill="var(--accent)"/></svg></div>`;
+}
+// O quiz vira o cadastro do app (app/ lê a mesma chave no mesmo domínio). Contrato em app/CONTRATO.md.
+function salvarPerfil(res, acompanha) {
+  const porte = st.porte || (st.ficha && st.ficha.porte) || 'medio';
+  const fichaId = st.racaOrigem === 'srd' || !st.ficha ? 'srd-' + (porte === 'médio' ? 'medio' : porte) : st.ficha.mix ? st.ficha.ids[0] : st.ficha.id;
+  const perfil = {
+    versao: 1, criadoEm: new Date().toISOString(), origem: 'quiz',
+    nome: st.nome || 'Seu cão', sexo: st.sexo, fichaId, racaRotulo: st.racaRotulo || nomeRaca(), racaOrigem: st.racaOrigem,
+    usaPorte: usaPorte(), porte,
+    mistura: st.ficha && st.ficha.mix ? { ids: st.ficha.ids, nomes: (st.mistura || []).map(m => m.nome), riscos: st.ficha.riscos, perguntas: st.ficha.perguntas, doencas: st.ficha.doencas } : null, idade: st.idade, idadeHumana: idadeHumana(st.idade, porte),
+    radar: Object.fromEntries(Object.entries(res).map(([k, v]) => [k, { st: v.st, raca: v.raca }])), acompanha,
+    respostas: Object.fromEntries(Object.entries(st.resp).filter(([k]) => !k.startsWith('sinal:'))),
+  };
+  try { localStorage.setItem('maisanos:perfil', JSON.stringify(perfil)); } catch (e) {}
+}
+function telaRadar(d) {
+  const { res, acompanha } = calcularRadar();
+  const rot = { atencao: ['Atenção', 'p-at'], observar: ['Observar', 'p-ob'], nao: ['Não observado', 'p-no'] };
+  const porte = st.porte || (st.ficha && st.ficha.porte) || 'medio';
+  enviar('radar', 'radar', { res: Object.fromEntries(Object.entries(res).map(([k, v]) => [k, v.st])), acompanha });
+  salvarPerfil(res, acompanha);
+  d.innerHTML = `<span class="selo">Radar dos 7 sinais</span>
+    <h2 style="margin-top:12px">Radar d${o()} ${esc(N())}</h2>
+    <p class="sub" style="margin-bottom:6px">${esc(nomeRaca()).replace(/^./, c => c.toUpperCase())} · ${st.idade} anos · ~${idadeHumana(st.idade, porte)} humanos</p>
+    ${radarSvg(false, res)}
+    <div class="topo-res" id="topoRes">
+      <div class="placar2"><div class="num">${acompanha} <span>de 7</span></div><p><b>sinais você já acompanha</b>${acompanha < 7 ? `Os ${7 - acompanha} que faltam são onde os problemas da idade começam escondidos.` : 'Agora veja o que fazer com os que pedem atenção.'}</p></div>
+      <button class="btn" id="ir" type="button">Ver o diagnóstico detalhado</button>
+    </div>
+    <div class="sinais" id="sinais"></div>`;
+  d.querySelector('#ir').onclick = proximo;
+  const lista = d.querySelector('#sinais'), topo = d.querySelector('#topoRes');
+  const linha = (k, nm, ex) => { const el = document.createElement('div'); el.className = 'linha nova';
+    el.innerHTML = `<span class="nm">${nm}${res[k].raca ? '<small>risco conhecido da raça</small>' : `<small>${ex}</small>`}</span><span class="pill ${rot[res[k].st][1]}">${rot[res[k].st][0]}</span>`; return el; };
+  const calmo = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (calmo) { SINAIS.slice().reverse().forEach(([k, nm, ex]) => lista.appendChild(linha(k, nm, ex))); topo.classList.add('on'); return; }
+  SINAIS.forEach(([k, nm, ex], i) => setTimeout(() => lista.prepend(linha(k, nm, ex)), 350 + i * 450)); // o novo entra em cima
+  setTimeout(() => topo.classList.add('on'), 350 + 7 * 450 + 150);
+}
+function telaVsl(d) {
+  const msgs = ['Cruzando a raça com a idade...', 'Conferindo os 7 sinais...', `Separando o que pede atenção agora n${o()} ${N()}...`, 'Comparando com os riscos conhecidos da raça...', 'Montando o plano...'];
+  d.innerHTML = `<h2>Analisando as respostas e gerando o diagnóstico detalhado d${o()} ${esc(N())}</h2>
+    <div class="carga" role="progressbar" aria-label="Gerando o diagnóstico"><i id="cg"></i></div><div class="etapa-carga" id="msg">${msgs[0]}</div>
+    <p style="font-weight:700;margin:18px 0 0">Enquanto isso, assista este vídeo:</p>
+    <div class="video" id="vid"><div class="ph">VSL entra aqui<br><small>(coloque o arquivo em <code>video/vsl.mp4</code>)</small></div></div>
+    <button class="btn" id="ir" type="button" hidden>Ver o diagnóstico e o plano d${o()} ${esc(N())}</button>`;
+  // se existir video/vsl.mp4, toca
+  fetch('video/vsl.mp4', { method: 'HEAD' }).then(r => { if (r.ok) d.querySelector('#vid').innerHTML = '<video src="video/vsl.mp4" playsinline controls autoplay></video>'; }).catch(() => {});
+  // segundos da barra. FASE DE TESTE: 5 s para analisar o funil. Quando fechar tudo, trocar pela duração da VSL (~240).
+  const DUR = +URLP.get('carga') || 5;
+  const cg = d.querySelector('#cg'), msg = d.querySelector('#msg'), ir = d.querySelector('#ir'); let t = 0;
+  const tick = setInterval(() => {
+    t++; const p = Math.min(100, Math.round(100 * (1 - Math.pow(1 - t / DUR, 1.6))));
+    cg.style.width = p + '%'; msg.textContent = msgs[Math.min(msgs.length - 1, Math.floor(t / DUR * msgs.length))];
+    if (t >= DUR) { clearInterval(tick); msg.textContent = 'Diagnóstico pronto.'; ir.hidden = false; enviar('carga_fim', 'diagnostico'); }
+  }, 1000);
+  ir.onclick = () => { clearInterval(tick); proximo(); };
+}
+// ---------- TSL: perfil → compatibilidade → dores (dados da raça) → antes × depois → benefícios → o que recebe + botão ----------
+// Link do checkout: ?checkout=URL ou a constante. Vazio = abre a demo do app (fase de teste do funil).
+const CHECKOUT = URLP.get('checkout') || '';
+// o app (entregável) mora em outro domínio; o cadastro do cão vai no link (?perfil=base64), e o app grava no localStorage dele
+const APP_URL = location.hostname === 'localhost' ? 'app/' : 'https://vovocao-app.vercel.app/';
+function linkApp() { try { const p = localStorage.getItem('maisanos:perfil'); if (!p) return APP_URL; const b = btoa(unescape(encodeURIComponent(p))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); return APP_URL + '?perfil=' + b; } catch (e) { return APP_URL; } }
+function telaOferta(d) {
+  enviar('oferta', 'oferta');
+  const { res, acompanha } = calcularRadar();
+  const porte = st.porte || (st.ficha && st.ficha.porte) || 'medio';
+  const f = st.ficha || F['srd-' + porte] || F['srd-medio'];
+  const h = idadeHumana(st.idade, porte);
+  const nome = esc(N()), oN = `${o()} ${nome}`, doN = `d${o()} ${nome}`;
+  const racaTxt = esc(nomeRaca()).replace(/^./, c => c.toUpperCase());
+  const fotoId = (st.racaOrigem === 'srd' || usaPorte() || !st.ficha) ? 'srd' : st.ficha.mix ? st.ficha.ids[0].replace(/^srd-.*/, 'srd') : st.ficha.id;
+  const fase = st.idade >= f.idosoAos ? `Idos${o()} desde os ${f.idosoAos}` : `Fase idosa aos ${f.idosoAos}`;
+  // dores: as da raça (mistura = as 2 primeiras de cada lado), com o número do estudo e o sinal que se vê em casa
+  const T = window.TSL_RACAS || {};
+  const idsDor = f.mix ? f.ids : [f.id];
+  let dores = f.mix ? idsDor.flatMap(id => (T[id] || []).slice(0, 2)) : (T[f.id] || []);
+  dores = dores.filter((x, i, a) => a.findIndex(y => y.nome === x.nome) === i).slice(0, 3);
+  const sinalDa = (nomeDoenca) => { const p = (f.perguntas || []).find(q => q.doenca && q.doenca.replace(/ \("sopro"\)/, ' (sopro)') === nomeDoenca); return p ? p.sinal : null; };
+  const nAt = Object.values(res).filter(r => r.st === 'atencao').length, nOb = Object.values(res).filter(r => r.st === 'observar').length, nNo = 7 - nAt - nOb;
+  const emAtencao = SINAIS.filter(([k]) => res[k].st === 'atencao').map(([, nm]) => nm);
+  const compat = Math.min(98, 91 + acompanha); // mais sinais respondidos = plano mais ajustado
+  const grupo = usaPorte() || st.racaOrigem === 'srd' || !st.ficha ? `cães de porte ${porteTxt()}` : (st.ficha.mix ? 'essa mistura' : esc(f.curto || nomeRaca()));
+  const prevTxt = st.racaOrigem === 'srd' || usaPorte() ? `as doenças do porte ${porteTxt()}` : `as doenças d${st.ficha && st.ficha.mix ? 'essa mistura' : (/^[aeiou]/i.test(f.curto) ? 'o ' : 'o ') + esc(f.curto)}`;
+  const linkComprar = CHECKOUT || linkApp();
+
+  d.innerHTML = `<div class="tsl">
+    <section style="text-align:center;align-items:center">
+      <span class="selo">✓ Diagnóstico pronto</span>
+      <h1 style="margin:6px 0 0">O plano para ${oN} viver mais anos, e anos bons</h1>
+    </section>
+
+    <section>
+      <div class="perfil">
+        <div class="topo-p">
+          <div class="foto">${icone({ img: 'img/raca-' + fotoId + '.webp', e: '🐶' }).replace(/^<span class="ic">|<\/span>$/g, '')}</div>
+          <div><div class="nm">${nome}</div><div class="rc">${racaTxt} · ${fem() ? 'fêmea' : 'macho'} · ${st.idade} anos</div></div>
+        </div>
+        <div class="tiles">
+          <div class="tile"><b>~${h}</b><span>anos em idade humana</span></div>
+          <div class="tile"><b>${String(f.vive).replace('.', ',')}</b><span>anos: a média de vida ${usaPorte() || st.racaOrigem === 'srd' ? 'do porte' : 'da raça'}</span></div>
+          <div class="tile"><b>${st.idade >= f.idosoAos ? '🕰️' : '⏳'}</b><span>${fase}</span></div>
+        </div>
+      </div>
+      <div class="chips-radar"><span class="pill p-at">${nAt} em atenção</span><span class="pill p-ob">${nOb} para observar</span>${nNo ? `<span class="pill p-no">${nNo} não observado${nNo > 1 ? 's' : ''}</span>` : ''}</div>
+    </section>
+
+    <section>
+      <div class="compat">
+        <div class="anel-c"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--soft)" stroke-width="3.4"/><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--accent)" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="${compat} 100"/></svg><b>${compat}%</b></div>
+        <div class="tx"><b>O Plano Vovocão é ${compat}% compatível com ${oN}</b><p>Montado com as respostas do diagnóstico.</p></div>
+      </div>
+      <ul class="checks-l">
+        <li><i>✓</i><span><b>${racaTxt}</b><small>Os cuidados e as doenças ${usaPorte() || st.racaOrigem === 'srd' ? 'do porte' : 'da raça'} já entram no plano</small></span></li>
+        <li><i>✓</i><span><b>${st.idade} anos (~${h} humanos)</b><small>Rotina no ritmo da idade ${doN}</small></span></li>
+        <li><i>✓</i><span><b>${emAtencao.length} sinal${emAtencao.length > 1 ? 'is' : ''} em atenção</b><small>${esc(emAtencao.join(' · '))}</small></span></li>
+      </ul>
+    </section>
+
+    <section>
+      <div class="kick">O que mais ameaça os anos ${doN}</div>
+      ${dores.map(x => { const s = sinalDa(x.nome); const marcou = s && res[s] && res[s].st === 'atencao'; return `<div class="dor"><div class="e">${x.e}</div><div><b>${esc(x.nome)}</b>${x.dado ? `<span class="dado">${esc(x.dado)}</span>` : ''}<span class="ve">👀 Em casa: ${esc(x.sinal)}</span>${marcou ? '<span class="marcou">⚠ Você marcou este sinal</span>' : ''}</div></div>`; }).join('')}
+      <div class="silencio">
+        <div class="big">${Ele()} não reclama.<br>${Ele()} se adapta.</div>
+        <p>${acompanha < 7 ? `Hoje você acompanha <b class="n">${acompanha} de 7</b> sinais. Os ${7 - acompanha} que faltam são onde os problemas da idade começam escondidos.` : `Você já olha os 7 sinais. Agora falta saber o que fazer com os que pedem atenção.`}</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="kick">A diferença</div>
+      <div class="vs">
+        <div class="col sem"><h4>❌ Sem um plano</h4><ul><li>Descobre no exame, quando já avançou</li><li>Chama dor de "preguiça da idade"</li><li>2 da manhã, sem saber se é emergência</li></ul></div>
+        <div class="col com"><h4>✅ Com o Vovocão</h4><ul><li>Percebe no 1º sinal, não no último</li><li>10 min por dia contra a dor e a apatia</li><li>Sabe se dá pra esperar ou se corre</li></ul></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="kick">10 minutos por dia, 5 cuidados</div>
+      <div class="tit">O que o plano faz pel${o()} ${nome}</div>
+      <div class="cuidados">
+        <div class="cuidado"><div class="e">🦴</div><b>Mobilidade e dor</b><span>Exercícios guiados com cronômetro</span></div>
+        <div class="cuidado"><div class="e">🥣</div><b>Alimentação e água</b><span>O que muda no prato e o que ${ele()} nunca pode comer</span></div>
+        <div class="cuidado"><div class="e">💊</div><b>Remédios</b><span>Lembrete de horário e o que é veneno</span></div>
+        <div class="cuidado"><div class="e">🩺</div><b>Prevenção</b><span>${prevTxt.replace(/^./, c => c.toUpperCase())} e o mapa de caroços</span></div>
+        <div class="cuidado larga"><div class="e">🎾</div><div><b>Mente e alegria</b><span>Brincadeiras de faro para ${ele()} ter dias bons de novo</span></div></div>
+      </div>
+      <div class="telas">
+        <img src="img/telas/01-hoje.webp" alt="Tela Hoje do app">
+        <img src="img/telas/03-radar.webp" alt="Radar semanal">
+        <img src="img/telas/05-pode-nao-pode.webp" alt="Pode ou não pode">
+        <img src="img/telas/04-guiado.webp" alt="Exercício guiado">
+        <img src="img/telas/10-sinais.webp" alt="É da idade ou é alerta">
+      </div>
+    </section>
+
+    <section id="oferta">
+      <div class="kick">O que você recebe hoje</div>
+      <ul class="checks-l rec">
+        <li><i>📱</i><span><b>App Vovocão com o perfil ${doN}</b><small>Já montado com as respostas do diagnóstico</small></span></li>
+        <li><i>⏱️</i><span><b>Plano diário de 10 minutos</b><small>Pela raça e pela idade ${doN}</small></span></li>
+        <li><i>📡</i><span><b>Check-up semanal de 2 minutos</b><small>Com o radar: o que melhorou, o que piorou</small></span></li>
+        <li><i>🧭</i><span><b>+40 sinais explicados</b><small>"É da idade ou é alerta?"</small></span></li>
+        <li><i>🚨</i><span><b>Emergência: o que fazer agora</b><small>Para as 2 da manhã de domingo</small></span></li>
+        <li><i>📄</i><span><b>Resumo para o veterinário</b><small>Chega na consulta sabendo o que contar</small></span></li>
+      </ul>
+      <div class="oferta-box">
+        <div class="de">Plano Vovocão d${o()} ${nome}</div>
+        <div class="preco"><small>R$</small>47</div>
+        <span class="unico">Pagamento único · acesso na hora</span>
+        <a class="btn-comprar" id="comprar" href="${esc(linkComprar)}">Quero o plano d${o()} ${nome} →</a>
+        <div class="seguro"><span>🔒 Compra segura</span><span>✅ Garantia de 7 dias</span><span>📱 Abre no celular</span></div>
+      </div>
+    </section>
+
+    <section class="faq">
+      <div class="kick">Dúvidas</div>
+      <details><summary>Funciona para ${grupo}?</summary><p>Sim. O plano já vem com os cuidados e as doenças ${usaPorte() || st.racaOrigem === 'srd' ? 'do porte' : 'da raça'} e da idade ${doN}.</p></details>
+      <details><summary>Preciso baixar alguma coisa?</summary><p>Não. Abre no navegador do celular, e você pode pôr o ícone na tela inicial.</p></details>
+      <details><summary>Substitui o veterinário?</summary><p>Não. Ele te ajuda a perceber os sinais cedo e a chegar na consulta na hora certa, sabendo o que contar.</p></details>
+      <details><summary>E se eu não gostar?</summary><p>Você tem 7 dias de garantia: pede o reembolso e recebe o valor de volta.</p></details>
+    </section>
+
+    <section style="text-align:center">
+      <div class="tit">${Ele()} não vai te avisar onde dói.<br><span style="color:var(--accent)">O Vovocão avisa.</span></div>
+      <a class="btn-comprar" href="${esc(linkComprar)}" data-comprar>Quero o plano d${o()} ${nome} →</a>
+    </section>
+  </div>
+  <div class="fixo" id="fixo"><div class="in"><div><b>Plano d${o()} ${nome}</b>R$ 47 · pagamento único</div><a href="${esc(linkComprar)}" data-comprar>Quero</a></div></div>`;
+  d.querySelectorAll('#comprar,[data-comprar]').forEach(a => a.addEventListener('click', () => enviar('checkout_clique', 'oferta', { compat, raca: f.id })));
+  // barra fixa de compra aparece depois do perfil e some quando a caixa de preço está na tela
+  const fixo = d.querySelector('#fixo'), caixa = d.querySelector('.oferta-box');
+  const ver = () => { const r = caixa.getBoundingClientRect(); fixo.classList.toggle('on', scrollY > 420 && !(r.top < innerHeight && r.bottom > 0)); };
+  addEventListener('scroll', ver, { passive: true }); ver();
+}
+
+// atalho de teste: ?teste=<id da ficha>&nome=Thor&idade=11&sexo=m abre direto a TSL (só para revisar a página)
+if (URLP.get('teste')) {
+  const id = URLP.get('teste'); st.ficha = F[id] || F['srd-medio']; st.racaOrigem = id.startsWith('srd') ? 'srd' : 'botao';
+  st.porte = st.ficha.porte; st.racaRotulo = id.startsWith('srd') ? '' : st.ficha.curto; st.nome = URLP.get('nome') || 'Thor';
+  st.idade = +URLP.get('idade') || 11; st.sexo = URLP.get('sexo') || 'm';
+  st.resp = { 'sinal:apetite:x': 'observar', 'sinal:agua:x': 'atencao', 'sinal:patas:x': 'observar', 'sinal:noite:x': 'nao', 'sinal:boca:x': 'observar', 'sinal:respiracao:x': 'observar', 'sinal:caroco:x': 'nao' };
+  { const r = calcularRadar(); salvarPerfil(r.res, r.acompanha); }
+  pos = E.findIndex(e => e.id === URLP.get('tela') || e.id === 'oferta');
+}
+mostrar();
+})();
+</script>
+</body>
+</html>

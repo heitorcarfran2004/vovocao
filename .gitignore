@@ -1,0 +1,6 @@
+app/
+_eventos-local.ndjson
+img/out/
+node_modules/
+.vercel/
+.url-no-ar
