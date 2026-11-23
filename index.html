@@ -365,9 +365,42 @@ function progresso() {
   document.getElementById('atoConta').textContent = e.ato < 4 ? `${e.ato + 1} de 4` : '';
   document.getElementById('trilha').style.width = (e.ato === 4 ? 100 : Math.max(4, Math.round(100 * (i + 1) / (vis.length + 1)))) + '%';
 }
+// ---------- sons de jogo (gerados no navegador, sem arquivo; baixinhos; nunca na tela da VSL) ----------
+const Som = (() => {
+  let ctx = null;
+  const ac = () => { try { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); if (ctx.state === 'suspended') ctx.resume(); } catch (e) { ctx = null; } return ctx; };
+  const tom = (f, dur, tipo = 'sine', vol = 0.1, quando = 0, f2) => {
+    const c = ac(); if (!c) return; const t = c.currentTime + quando;
+    const o = c.createOscillator(), g = c.createGain(); o.type = tipo; o.frequency.setValueAtTime(f, t);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(c.destination); o.start(t); o.stop(t + dur + 0.02);
+  };
+  return {
+    tique: () => tom(1250, 0.05, 'sine', 0.07, 0, 900),
+    pop: () => { tom(520, 0.09, 'triangle', 0.11, 0, 820); },
+    ping: (i) => tom(740 * Math.pow(2, i / 7 * 0.75), 0.22, 'sine', 0.075),
+    nivel: () => [523, 659, 784].forEach((f, i) => tom(f, 0.13, 'triangle', 0.08, i * 0.07)),
+    desbloqueio: () => [660, 880, 1320].forEach((f, i) => tom(f, 0.16, 'sine', 0.09, i * 0.08)),
+    vitoria: () => { [523, 659, 784, 1047].forEach((f, i) => tom(f, 0.18, 'triangle', 0.09, i * 0.09)); [523, 659, 784].forEach(f => tom(f, 0.7, 'sine', 0.045, 0.38)); },
+    brilho: () => [1568, 2093, 2637].forEach((f, i) => tom(f, 0.12, 'sine', 0.045, i * 0.05)),
+  };
+})();
+// clique em opção = tique; botão = pop (escuta uma vez só, para o quiz todo)
+document.addEventListener('click', (ev) => {
+  const t = ev.target.closest && ev.target.closest('.op, .sug button, .idade button, .btn, .btn-comprar, .faq summary');
+  if (!t || t.disabled) return;
+  if (t.matches('.btn, .btn-comprar')) Som.pop(); else Som.tique();
+}, true);
+let atoAnterior = 0;
 function mostrar() {
   const e = E[pos]; progresso(); window.scrollTo(0, 0);
   enviar('etapa', e.id);
+  // gamificação: subiu de ato = "nível"; o desbloqueio da idade humana e as telas "Você sabia?" ganham brilho; a oferta também
+  if (e.ato > atoAnterior && e.ato < 4) setTimeout(Som.nivel, 120);
+  else if (e.id === 'idade-humana') setTimeout(Som.desbloqueio, 150);
+  else if (e.tipo === 'info' || e.tipo === 'oferta') setTimeout(Som.brilho, 150);
+  atoAnterior = e.ato;
   const r = { abertura: telaAbertura, nome: telaNome, unica: telaUnica, multi: telaMulti, raca: telaRaca, idade: telaIdade, info: telaInfo, radar: telaRadar, vsl: telaVsl, oferta: telaOferta }[e.tipo];
   app.innerHTML = ''; const div = document.createElement('div'); div.className = 'tela'; app.appendChild(div); r(div, e);
 }
@@ -656,8 +689,8 @@ function telaRadar(d) {
     el.innerHTML = `<span class="nm">${nm}${res[k].raca ? '<small>risco conhecido da raça</small>' : `<small>${ex}</small>`}</span><span class="pill ${rot[res[k].st][1]}">${rot[res[k].st][0]}</span>`; return el; };
   const calmo = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (calmo) { SINAIS.slice().reverse().forEach(([k, nm, ex]) => lista.appendChild(linha(k, nm, ex))); topo.classList.add('on'); return; }
-  SINAIS.forEach(([k, nm, ex], i) => setTimeout(() => lista.prepend(linha(k, nm, ex)), 350 + i * 450)); // o novo entra em cima
-  setTimeout(() => topo.classList.add('on'), 350 + 7 * 450 + 150);
+  SINAIS.forEach(([k, nm, ex], i) => setTimeout(() => { lista.prepend(linha(k, nm, ex)); Som.ping(i); }, 350 + i * 450)); // o novo entra em cima
+  setTimeout(() => { topo.classList.add('on'); Som.vitoria(); }, 350 + 7 * 450 + 150);
 }
 function telaVsl(d) {
   const msgs = ['Cruzando a raça com a idade...', 'Conferindo os 7 sinais...', `Separando o que pede atenção agora n${o()} ${N()}...`, 'Comparando com os riscos conhecidos da raça...', 'Montando o plano...'];
