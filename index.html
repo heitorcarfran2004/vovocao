@@ -155,6 +155,11 @@ h2{font:800 clamp(23px,6vw,29px)/1.15 var(--f-d);letter-spacing:-.01em;margin:4p
 .descer.on{opacity:.95;pointer-events:auto;animation:quica 1.4s ease-in-out infinite}
 .descer.alto{bottom:92px}
 @keyframes quica{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+/* VSL: só toca no clique (o Smart Autoplay do vTurb fica pausado no início, com este botão por cima) */
+.play-vsl{position:absolute;inset:0;z-index:5;border:0;padding:0;cursor:pointer;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  background:linear-gradient(180deg,rgba(8,20,16,.15) 0%,rgba(8,20,16,.55) 100%);font:700 17px/1.2 var(--f-b);text-shadow:0 2px 10px rgba(0,0,0,.5)}
+.play-vsl i{width:84px;height:84px;border-radius:50%;background:var(--accent);display:grid;place-items:center;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:pulsa 1.8s ease-in-out infinite}
+.play-vsl i svg{width:34px;height:34px;margin-left:5px}
 /* ---------- TSL (oferta personalizada) ---------- */
 .tsl{display:flex;flex-direction:column;gap:34px;padding-bottom:84px}
 .tsl section{display:flex;flex-direction:column;gap:12px}
@@ -723,7 +728,7 @@ function telaVsl(d) {
   d.innerHTML = `<h2>Analisando as respostas e gerando o diagnóstico detalhado d${o()} ${esc(N())}</h2>
     <div class="carga" role="progressbar" aria-label="Gerando o diagnóstico"><i id="cg"></i></div><div class="etapa-carga" id="msg">${msgs[0]}</div>
     <p style="font-weight:700;margin:18px 0 0">Enquanto isso, assista este vídeo:</p>
-    <div style="margin:12px auto 0;width:80%;max-width:320px;border-radius:20px;overflow:hidden;box-shadow:0 16px 34px -20px rgba(0,0,0,.55);transform:translateZ(0)"><vturb-smartplayer id="vid-6b03c16d7d02723f206fe6b1" style="display: block; margin: 0 auto; width: 100%; max-width: 400px;"><div class="vturb-player-placeholder" style="position: relative; width: 100%; padding: 177.77777777777777% 0 0; z-index: 0; background-color: black;"></div></vturb-smartplayer></div>
+    <div style="position:relative;margin:12px auto 0;width:80%;max-width:320px;border-radius:20px;overflow:hidden;box-shadow:0 16px 34px -20px rgba(0,0,0,.55);transform:translateZ(0)"><vturb-smartplayer id="vid-6b03c16d7d02723f206fe6b1" style="display: block; margin: 0 auto; width: 100%; max-width: 400px;"><div class="vturb-player-placeholder" style="position: relative; width: 100%; padding: 177.77777777777777% 0 0; z-index: 0; background-color: black;"></div></vturb-smartplayer><button class="play-vsl" id="playVsl" type="button" aria-label="Assistir o vídeo"><i><svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></i>Toque para assistir</button></div>
     <button class="btn esconder" id="ir" type="button" style="display:none">Ver o diagnóstico e o plano d${o()} ${esc(N())}</button>`;
   // VSL no vTurb: o script do player entra uma vez só
   if (!document.getElementById('vturb-player-js')) { const s = document.createElement('script'); s.id = 'vturb-player-js'; s.src = 'https://scripts.converteai.net/59fb2471-bbf9-48ae-ad59-009b3aba8bd1/players/6b03c16d7d02723f206fe6b1/v4/player.js'; s.async = true; document.head.appendChild(s); }
@@ -734,8 +739,14 @@ function telaVsl(d) {
   let pagina = 0, mostrado = 0, pronto = false, playerOk = false;
   const liberar = () => { if (pronto) return; pronto = true; clearInterval(tick); ir.style.display = 'block'; cg.style.width = '100%'; msg.textContent = 'Diagnóstico pronto.'; enviar('carga_fim', 'diagnostico'); };
   const pl = d.querySelector('vturb-smartplayer');
+  // só no clique: assim que o player fica pronto, pausa a prévia automática e volta ao início; o botão por cima dá o play com som
+  const btPlay = d.querySelector('#playVsl'); let clicou = false;
+  const segurar = () => { if (clicou) return; try { if (typeof pl.pause === 'function' && pl.paused === false) { pl.pause(); if (pl.seek) pl.seek(0); } } catch (e) {} };
+  const vigia = setInterval(() => { if (clicou || !document.body.contains(pl)) return clearInterval(vigia); segurar(); }, 200);
+  btPlay.onclick = () => { clicou = true; clearInterval(vigia); btPlay.remove(); try { if (pl.unmute) pl.unmute(); if (pl.setVolume) pl.setVolume(1); pl.play(); } catch (e) {} enviar('vsl_play', 'diagnostico'); };
   pl.addEventListener('player:ready', (ev) => {
     playerOk = true; const p = ev.target;
+    segurar();
     if (!URLP.get('carga')) { try { p.displayHiddenElements(ALVO, ['.esconder'], { persist: true }); } catch (e) {} }
   });
   const tick = setInterval(() => {
