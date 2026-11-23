@@ -698,16 +698,29 @@ function telaVsl(d) {
     <div class="carga" role="progressbar" aria-label="Gerando o diagnóstico"><i id="cg"></i></div><div class="etapa-carga" id="msg">${msgs[0]}</div>
     <p style="font-weight:700;margin:18px 0 0">Enquanto isso, assista este vídeo:</p>
     <div style="margin:12px auto 0;width:80%;max-width:320px;border-radius:20px;overflow:hidden;box-shadow:0 16px 34px -20px rgba(0,0,0,.55);transform:translateZ(0)"><vturb-smartplayer id="vid-6b03c16d7d02723f206fe6b1" style="display: block; margin: 0 auto; width: 100%; max-width: 400px;"><div class="vturb-player-placeholder" style="position: relative; width: 100%; padding: 177.77777777777777% 0 0; z-index: 0; background-color: black;"></div></vturb-smartplayer></div>
-    <button class="btn" id="ir" type="button" hidden>Ver o diagnóstico e o plano d${o()} ${esc(N())}</button>`;
+    <button class="btn esconder" id="ir" type="button" style="display:none">Ver o diagnóstico e o plano d${o()} ${esc(N())}</button>`;
   // VSL no vTurb: o script do player entra uma vez só
   if (!document.getElementById('vturb-player-js')) { const s = document.createElement('script'); s.id = 'vturb-player-js'; s.src = 'https://scripts.converteai.net/59fb2471-bbf9-48ae-ad59-009b3aba8bd1/players/6b03c16d7d02723f206fe6b1/v4/player.js'; s.async = true; document.head.appendChild(s); }
-  // segundos da barra. FASE DE TESTE: 5 s para analisar o funil. Quando fechar tudo, trocar pela duração da VSL (~240).
-  const DUR = +URLP.get('carga') || 5;
-  const cg = d.querySelector('#cg'), msg = d.querySelector('#msg'), ir = d.querySelector('#ir'); let t = 0;
+  // O botão libera aos 90% da VSL (4 min 05 s → 220 s de vídeo ASSISTIDO), pelo código de atraso oficial do vTurb (displayHiddenElements).
+  // A barra acompanha o tempo do vídeo. Reserva: se o player não carregar, conta o tempo da página. Teste: ?carga=10
+  const ALVO = +URLP.get('carga') || 220;
+  const cg = d.querySelector('#cg'), msg = d.querySelector('#msg'), ir = d.querySelector('#ir');
+  let pagina = 0, pronto = false, playerOk = false;
+  const liberar = () => { if (pronto) return; pronto = true; clearInterval(tick); ir.style.display = 'block'; cg.style.width = '100%'; msg.textContent = 'Diagnóstico pronto.'; enviar('carga_fim', 'diagnostico'); };
+  const pl = d.querySelector('vturb-smartplayer');
+  pl.addEventListener('player:ready', (ev) => {
+    playerOk = true; const p = ev.target;
+    if (!URLP.get('carga')) { try { p.displayHiddenElements(ALVO, ['.esconder'], { persist: true }); } catch (e) {} }
+  });
   const tick = setInterval(() => {
-    t++; const p = Math.min(100, Math.round(100 * (1 - Math.pow(1 - t / DUR, 1.6))));
-    cg.style.width = p + '%'; msg.textContent = msgs[Math.min(msgs.length - 1, Math.floor(t / DUR * msgs.length))];
-    if (t >= DUR) { clearInterval(tick); msg.textContent = 'Diagnóstico pronto.'; ir.hidden = false; enviar('carga_fim', 'diagnostico'); }
+    pagina++;
+    if (getComputedStyle(ir).display !== 'none') return liberar(); // o vTurb já liberou (inclusive para quem volta: persist)
+    // tempo do vídeo pelo próprio player (currentTime); na prévia muda (inSmartAutoPlay) a barra anda mas não libera
+    let t = pagina; try { if (playerOk && typeof pl.currentTime === 'number') t = pl.currentTime; } catch (e) {}
+    const previa = playerOk && pl.inSmartAutoPlay;
+    const p = Math.min(97, Math.round(100 * (1 - Math.pow(1 - Math.min(1, t / ALVO), 1.6))));
+    cg.style.width = p + '%'; msg.textContent = msgs[Math.min(msgs.length - 1, Math.floor(Math.min(1, t / ALVO) * msgs.length))];
+    if ((t >= ALVO && !previa) || (!playerOk && pagina >= ALVO + 20)) liberar();
   }, 1000);
   ir.onclick = () => { clearInterval(tick); proximo(); };
 }
