@@ -1,6 +1,6 @@
 -- Painel do quiz Vovocão: tabela de eventos + função de leitura com chave.
--- Rodar UMA vez no SQL Editor do Supabase, projeto "banco-de-ofertas" (dxybmayffxvepmwbyezc).
--- Só ADICIONA coisas (tabela quiz_eventos, tabela quiz_painel_chaves, função quiz_painel). Não mexe nas tabelas dos membros.
+-- Rodar UMA vez no SQL Editor do Supabase, projeto "heitorcarfran2004's Project" (pdsnjmdgvwfomuvbjtiw), conta nova.
+-- Só ADICIONA coisas (tabela quiz_eventos, tabela quiz_painel_chaves, função quiz_painel). Não mexe nas outras tabelas (members, leads, products...).
 -- O navegador só consegue INSERIR eventos (chave pública). Ler, só pela função, com a chave do painel.
 
 create table if not exists public.quiz_eventos (

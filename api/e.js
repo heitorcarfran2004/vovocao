@@ -1,9 +1,9 @@
 // Recebe os eventos do quiz (cada tela vista, cada resposta, VSL 90%, oferta, clique no checkout) e grava no Supabase.
 // O navegador manda para /api/e (mesmo domínio do quiz), então bloqueador de anúncio não corta.
-// Usa a chave PÚBLICA (anon) do projeto banco-de-ofertas: a tabela quiz_eventos só aceita INSERT dessa chave (ninguém lê).
+// Usa a chave PÚBLICA (anon) do projeto heitorcarfran2004's Project: a tabela quiz_eventos só aceita INSERT dessa chave (ninguém lê).
 // A leitura é pela função quiz_painel, que exige a chave do painel. SQL em sql/quiz_eventos.sql.
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://dxybmayffxvepmwbyezc.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4eWJtYXlmZnh2ZXBtd2J5ZXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0ODY0OTksImV4cCI6MjEwNTA2MjQ5OX0.N5e2iynKyQ7z0xFVKSy4lAc7Fy9RulIAARrx_OtolIM';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://pdsnjmdgvwfomuvbjtiw.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkc25qbWRndndmb211dmJqdGl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MzA3NzcsImV4cCI6MjA5NjEwNjc3N30.EujmVoW9QfO0Gmu7H0Y2Lnt4nmtqDNWIOBoAUATmaQY';
 const CAMPOS = ['quiz', 'variante', 'sid', 'tipo', 'etapa', 'resposta', 'dispositivo', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
 
 module.exports = async (req, res) => {
