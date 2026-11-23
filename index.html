@@ -664,7 +664,7 @@ function telaVsl(d) {
   d.innerHTML = `<h2>Analisando as respostas e gerando o diagnóstico detalhado d${o()} ${esc(N())}</h2>
     <div class="carga" role="progressbar" aria-label="Gerando o diagnóstico"><i id="cg"></i></div><div class="etapa-carga" id="msg">${msgs[0]}</div>
     <p style="font-weight:700;margin:18px 0 0">Enquanto isso, assista este vídeo:</p>
-    <div style="margin-top:12px"><vturb-smartplayer id="vid-6b03c16d7d02723f206fe6b1" style="display: block; margin: 0 auto; width: 100%; max-width: 400px;"><div class="vturb-player-placeholder" style="position: relative; width: 100%; padding: 177.77777777777777% 0 0; z-index: 0; background-color: black;"></div></vturb-smartplayer></div>
+    <div style="margin:12px auto 0;width:80%;max-width:320px;border-radius:20px;overflow:hidden;box-shadow:0 16px 34px -20px rgba(0,0,0,.55);transform:translateZ(0)"><vturb-smartplayer id="vid-6b03c16d7d02723f206fe6b1" style="display: block; margin: 0 auto; width: 100%; max-width: 400px;"><div class="vturb-player-placeholder" style="position: relative; width: 100%; padding: 177.77777777777777% 0 0; z-index: 0; background-color: black;"></div></vturb-smartplayer></div>
     <button class="btn" id="ir" type="button" hidden>Ver o diagnóstico e o plano d${o()} ${esc(N())}</button>`;
   // VSL no vTurb: o script do player entra uma vez só
   if (!document.getElementById('vturb-player-js')) { const s = document.createElement('script'); s.id = 'vturb-player-js'; s.src = 'https://scripts.converteai.net/59fb2471-bbf9-48ae-ad59-009b3aba8bd1/players/6b03c16d7d02723f206fe6b1/v4/player.js'; s.async = true; document.head.appendChild(s); }
