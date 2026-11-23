@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Painel do Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Painel do quiz Vovocão: funil por etapa, onde perde gente, respostas, aberturas, criativos e dias. Lê pela função quiz_painel (chave). */
+:root{--bg:#F2F6F4;--card:#fff;--ink:#14201B;--muted:#5A6A63;--line:#D8E2DD;--soft:#E7EFEB;--verde:#0C7563;--verde-claro:#DDF0EA;--at:#C4471B;--at-soft:#FBE6DC;--ob:#B07A12;
+  --f-d:"Bricolage Grotesque","Segoe UI",sans-serif;--f-b:"Inter","Segoe UI",system-ui,sans-serif}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--f-b);padding:0 16px 48px}
+.w{max-width:1040px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:20px 0 14px}
+h1{font:800 24px/1.1 var(--f-d);margin:0}
+h1 small{display:block;font:500 13px var(--f-b);color:var(--muted);margin-top:4px}
+.filtros{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{border:1.5px solid var(--line);background:var(--card);border-radius:99px;padding:7px 13px;font:600 13px var(--f-b);cursor:pointer;color:var(--ink)}
+.chip.on{border-color:var(--verde);background:var(--verde-claro);color:var(--verde)}
+select{border:1.5px solid var(--line);border-radius:10px;padding:7px 10px;font:600 13px var(--f-b);background:var(--card)}
+h2{font:800 18px/1.2 var(--f-d);margin:26px 0 10px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.kpi b{display:block;font:800 28px/1 var(--f-d)}
+.kpi span{font-size:12.5px;color:var(--muted)}
+.kpi i{font-style:normal;font-weight:700;color:var(--verde);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.alerta{border-left:4px solid var(--at)}
+.alerta li{margin:4px 0}
+.funil .lin{display:grid;grid-template-columns:minmax(120px,230px) 1fr 64px 70px 60px;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--soft);font-size:13.5px}
+.funil .lin:last-child{border-bottom:0}
+.barra{height:16px;background:var(--soft);border-radius:6px;overflow:hidden}
+.barra i{display:block;height:100%;background:var(--verde);border-radius:6px}
+.queda{font-weight:700;text-align:right}
+.queda.ruim{color:var(--at)} .queda.media{color:var(--ob)} .queda.boa{color:var(--verde)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.cab{font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:8px 6px;border-bottom:1px solid var(--soft);text-align:left}
+th{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+details.perg{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:8px}
+details.perg summary{cursor:pointer;font-weight:700}
+.op{display:grid;grid-template-columns:minmax(120px,1fr) 2fr 50px;gap:10px;align-items:center;font-size:13px;margin-top:6px}
+.vazio,.erro{padding:30px;text-align:center;color:var(--muted)}
+.erro{color:var(--at)}
+.chave{max-width:380px;margin:80px auto;text-align:center}
+.chave input{width:100%;font:600 16px var(--f-b);padding:12px;border-radius:12px;border:1.5px solid var(--line);margin:12px 0}
+.chave button{width:100%;border:0;border-radius:12px;background:var(--verde);color:#fff;font:700 16px var(--f-b);padding:13px;cursor:pointer}
+.dias{display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:10px}
+.dias div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)}
+.dias div i{width:100%;max-width:34px;background:var(--verde);border-radius:5px 5px 0 0;min-height:2px}
+@media (max-width:640px){.funil .lin{grid-template-columns:110px 1fr 46px 56px}.funil .lin .seg{display:none}}
+</style>
+</head>
+<body>
+<div class="w" id="app"></div>
+<script>
+(function () {
+'use strict';
+const SB = 'https://dxybmayffxvepmwbyezc.supabase.co';
+const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4eWJtYXlmZnh2ZXBtd2J5ZXpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0ODY0OTksImV4cCI6MjEwNTA2MjQ5OX0.N5e2iynKyQ7z0xFVKSy4lAc7Fy9RulIAARrx_OtolIM';
+// nome de cada etapa do quiz (ids do index.html)
+const NOMES = { abertura: 'Abertura', nome: 'Nome do cão', sexo: 'Macho/fêmea', raca: 'Raça', porte: 'Porte', idade: 'Idade', 'idade-humana': 'Idade humana (desbloqueio)',
+  porta: 'Recebe na porta?', sono: 'Sono', apetite: 'Apetite', agua: 'Água e xixi', patas: 'Patas (múltipla)', consulta: 'Última consulta',
+  'sabia-raca': 'Você sabia? (raça)', 'raca-1': 'Pergunta da raça 1', 'raca-2': 'Pergunta da raça 2', noite: 'Madrugada', respiracao: 'Respiração', caroco: 'Caroço', gengiva: 'Gengiva', remedio: 'Remédio de gente',
+  animo: 'Ânimo hoje', saudade: 'Do que sente falta', 'sabia-qualidade': 'Você sabia? (qualidade)', 'da-idade': '"É da idade"', madrugada: '2 da manhã', 'sinais-todos': 'Viu todos os sinais?', desejo: 'O que quer viver',
+  radar: 'Radar (resultado)', diagnostico: 'VSL (carregando)', oferta: 'Oferta (TSL)' };
+const nm = (e) => NOMES[e] || e;
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pct = (a, b) => b ? Math.round(1000 * a / b) / 10 : 0;
+const app = document.getElementById('app');
+const q = new URLSearchParams(location.search);
+let chave = q.get('k'); try { if (chave) localStorage.setItem('vovocao:painel', chave); else chave = localStorage.getItem('vovocao:painel'); } catch (e) {}
+let periodo = '7', variante = '';
+
+function pedirChave(msg) {
+  app.innerHTML = `<div class="chave"><h1>Painel do Quiz</h1><p style="color:var(--muted)">${msg || 'Digite a chave do painel.'}</p><input id="k" type="password" placeholder="Chave"><button id="ok">Entrar</button></div>`;
+  const ir = () => { chave = document.getElementById('k').value.trim(); try { localStorage.setItem('vovocao:painel', chave); } catch (e) {} carregar(); };
+  document.getElementById('ok').onclick = ir; document.getElementById('k').onkeydown = (e) => { if (e.key === 'Enter') ir(); };
+}
+
+async function carregar() {
+  if (!chave) return pedirChave();
+  const desde = periodo === 'tudo' ? '2020-01-01T00:00:00Z' : periodo === 'hoje' ? new Date(new Date().setHours(0, 0, 0, 0)).toISOString() : new Date(Date.now() - (+periodo) * 864e5).toISOString();
+  app.innerHTML = cabecalho() + '<div class="vazio">Carregando…</div>'; ligarFiltros();
+  try {
+    const r = await fetch(SB + '/rest/v1/rpc/quiz_painel', { method: 'POST', headers: { apikey: ANON, Authorization: 'Bearer ' + ANON, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_quiz: 'vovocao', p_chave: chave, p_desde: desde, p_variante: variante || null }) });
+    const j = await r.json();
+    if (!r.ok) { if (/chave invalida/i.test(j.message || '')) return pedirChave('Chave errada. Tente de novo.'); throw new Error(j.message || r.status); }
+    desenhar(j);
+  } catch (e) { app.innerHTML = cabecalho() + `<div class="card erro">Não deu para ler os dados: ${esc(e.message)}.<br>Se a tabela ainda não foi criada, rode o sql/quiz_eventos.sql no Supabase.</div>`; ligarFiltros(); }
+}
+
+function cabecalho() {
+  const ch = (v, t) => `<button class="chip${periodo === v ? ' on' : ''}" data-p="${v}">${t}</button>`;
+  return `<header><h1>Painel do Quiz Vovocão<small>Funil por etapa, onde perde gente e o que cada um responde</small></h1>
+    <div class="filtros">${ch('hoje', 'Hoje')}${ch('1', '24 h')}${ch('7', '7 dias')}${ch('30', '30 dias')}${ch('tudo', 'Tudo')}
+    <select id="var"><option value="">Todas as aberturas</option>${[1, 2, 3, 4, 5].map(n => `<option value="v${n}"${variante === 'v' + n ? ' selected' : ''}>Abertura v${n}</option>`).join('')}</select></div></header>`;
+}
+function ligarFiltros() {
+  app.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { periodo = b.dataset.p; carregar(); });
+  const s = app.querySelector('#var'); if (s) s.onchange = () => { variante = s.value; carregar(); };
+}
+
+function desenhar(d) {
+  const etapas = (d.etapas || []).filter(e => e.etapa).sort((a, b) => (a.ordem ?? 99) - (b.ordem ?? 99));
+  const v = (d.variantes || []).reduce((a, x) => { for (const k of ['comecaram', 'radar', 'vsl_90', 'oferta', 'checkout']) a[k] = (a[k] || 0) + (x[k] || 0); return a; }, {});
+  const topo = etapas[0] ? etapas[0].sessoes : 0;
+  // quedas de uma etapa para a seguinte
+  const quedas = etapas.map((e, i) => ({ e, ant: i ? etapas[i - 1] : null, q: i ? pct(etapas[i - 1].sessoes - e.sessoes, etapas[i - 1].sessoes) : 0 })).slice(1);
+  const piores = quedas.filter(x => x.ant.sessoes >= 5).sort((a, b) => b.q - a.q).slice(0, 3);
+  let h = cabecalho();
+  if (!d.total_sessoes) { app.innerHTML = h + '<div class="card vazio">Nenhuma visita nesse período ainda.</div>'; return ligarFiltros(); }
+  h += `<div class="kpis">
+    <div class="kpi"><b>${d.total_sessoes}</b><span>visitas</span></div>
+    <div class="kpi"><b>${v.comecaram || 0}</b><span>começaram o quiz</span> <i>${pct(v.comecaram, d.total_sessoes)}%</i></div>
+    <div class="kpi"><b>${v.radar || 0}</b><span>viram o radar</span> <i>${pct(v.radar, v.comecaram)}%</i></div>
+    <div class="kpi"><b>${v.vsl_90 || 0}</b><span>VSL até 90%</span> <i>${pct(v.vsl_90, v.radar)}%</i></div>
+    <div class="kpi"><b>${v.oferta || 0}</b><span>chegaram na oferta</span> <i>${pct(v.oferta, v.comecaram)}%</i></div>
+    <div class="kpi"><b>${v.checkout || 0}</b><span>clicaram em comprar</span> <i>${pct(v.checkout, v.oferta)}% da oferta</i></div></div>`;
+  if (piores.length) h += `<h2>Onde mais perde gente</h2><div class="card alerta"><ol style="margin:0;padding-left:20px">${piores.map(x => `<li><b>${esc(nm(x.ant.etapa))} → ${esc(nm(x.e.etapa))}</b>: perde <b style="color:var(--at)">${x.q}%</b> (${x.ant.sessoes} → ${x.e.sessoes})</li>`).join('')}</ol></div>`;
+  h += `<h2>Funil por etapa</h2><div class="card funil"><div class="lin cab"><span>Etapa</span><span>Chegaram</span><span class="num">Qtde</span><span class="num">Perda</span><span class="num seg">Seg.</span></div>
+    ${etapas.map((e, i) => { const q = i ? pct(etapas[i - 1].sessoes - e.sessoes, etapas[i - 1].sessoes) : 0; const cl = q >= 15 ? 'ruim' : q >= 7 ? 'media' : 'boa';
+      return `<div class="lin"><span>${esc(nm(e.etapa))}</span><div class="barra"><i style="width:${pct(e.sessoes, topo)}%"></i></div><span class="num">${e.sessoes}</span><span class="queda ${i ? cl : ''}">${i ? '-' + q + '%' : ''}</span><span class="num seg">${e.seg_mediana != null ? e.seg_mediana + 's' : ''}</span></div>`; }).join('')}</div>
+    <p style="font-size:12.5px;color:var(--muted)">Perda = quantos da etapa anterior não chegaram nesta. Seg. = tempo mediano para responder. Vermelho: perde 15% ou mais.</p>`;
+  // respostas por pergunta
+  const porEtapa = {}; (d.respostas || []).forEach(r => (porEtapa[r.etapa] = porEtapa[r.etapa] || []).push(r));
+  h += `<h2>O que cada um responde</h2>` + etapas.filter(e => porEtapa[e.etapa]).map(e => {
+    const ops = porEtapa[e.etapa], tot = ops.reduce((a, o) => a + o.sessoes, 0), mx = Math.max(...ops.map(o => o.sessoes));
+    return `<details class="perg"><summary>${esc(nm(e.etapa))} <span style="color:var(--muted);font-weight:500">(${tot})</span></summary>${ops.slice(0, 15).map(o => `<div class="op"><span>${esc(o.resposta)}</span><div class="barra"><i style="width:${pct(o.sessoes, mx)}%"></i></div><span class="num">${pct(o.sessoes, tot)}%</span></div>`).join('')}</details>`;
+  }).join('');
+  // aberturas e criativos
+  h += `<h2>Aberturas (v1 a v5)</h2><div class="card"><table><tr><th>Abertura</th><th class="n">Começaram</th><th class="n">Radar</th><th class="n">VSL 90%</th><th class="n">Oferta</th><th class="n">Comprar</th><th class="n">Começou→comprar</th></tr>
+    ${(d.variantes || []).map(x => `<tr><td>${esc(x.variante)}</td><td class="n">${x.comecaram}</td><td class="n">${x.radar}</td><td class="n">${x.vsl_90}</td><td class="n">${x.oferta}</td><td class="n">${x.checkout}</td><td class="n"><b>${pct(x.checkout, x.comecaram)}%</b></td></tr>`).join('')}</table></div>`;
+  h += `<h2>Por criativo (utm_content)</h2><div class="card"><table><tr><th>Criativo</th><th class="n">Visitas</th><th class="n">Começaram</th><th class="n">Oferta</th><th class="n">Comprar</th><th class="n">Visita→comprar</th></tr>
+    ${(d.criativos || []).map(x => `<tr><td>${esc(x.criativo)}</td><td class="n">${x.sessoes}</td><td class="n">${x.comecaram}</td><td class="n">${x.oferta}</td><td class="n">${x.checkout}</td><td class="n"><b>${pct(x.checkout, x.sessoes)}%</b></td></tr>`).join('')}</table></div>`;
+  const dias = d.dias || [], mxd = Math.max(1, ...dias.map(x => x.sessoes));
+  h += `<h2>Visitas por dia</h2><div class="card"><div class="dias">${dias.map(x => `<div title="${x.sessoes} visitas, ${x.checkout} cliques em comprar"><span>${x.sessoes}</span><i style="height:${Math.round(90 * x.sessoes / mxd)}px"></i><span>${esc(x.dia)}</span></div>`).join('')}</div></div>`;
+  const disp = d.dispositivos || {};
+  h += `<p style="font-size:12.5px;color:var(--muted);margin-top:18px">Aparelho: ${Object.entries(disp).map(([k, n]) => `${esc(k)} ${n}`).join(' · ')}. Visitas pelo atalho <code>?teste=</code> não entram.</p>`;
+  app.innerHTML = h; ligarFiltros();
+}
+carregar();
+})();
+</script>
+</body>
+</html>
