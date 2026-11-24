@@ -784,9 +784,9 @@ function telaVsl(d) {
     <button class="btn esconder" id="ir" type="button" style="display:none">Ver o diagnóstico e o plano d${o()} ${esc(N())}</button>`;
   // VSL no vTurb: o script do player entra uma vez só
   if (!document.getElementById('vturb-player-js')) { const s = document.createElement('script'); s.id = 'vturb-player-js'; s.src = 'https://scripts.converteai.net/59fb2471-bbf9-48ae-ad59-009b3aba8bd1/players/6b0608fae34a7e03d4e5fba7/v4/player.js'; s.async = true; document.head.appendChild(s); }
-  // O botão libera aos 90% da VSL (VSL R$ 37, 4 min 06 s → 221 s de vídeo ASSISTIDO), pelo código de atraso oficial do vTurb (displayHiddenElements).
+  // O botão libera aos 90% da VSL (VSL R$ 37, 4 min 06 s: libera aos 240 s de vídeo ASSISTIDO, logo depois de "R$ 37, uma vez só" que termina em 239,4 s), pelo código de atraso oficial do vTurb (displayHiddenElements).
   // A barra acompanha o tempo do vídeo. Reserva: se o player não carregar, conta o tempo da página. Teste: ?carga=10
-  const ALVO = +URLP.get('carga') || 221;
+  const ALVO = +URLP.get('carga') || 240;
   const cg = d.querySelector('#cg'), msg = d.querySelector('#msg'), ir = d.querySelector('#ir');
   let pagina = 0, mostrado = 0, pronto = false, playerOk = false;
   const liberar = () => { if (pronto) return; pronto = true; clearInterval(tick); ir.style.display = 'block'; cg.style.width = '100%'; msg.textContent = 'Diagnóstico pronto.'; enviar('carga_fim', 'diagnostico'); };
