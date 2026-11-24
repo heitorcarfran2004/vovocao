@@ -225,6 +225,19 @@ h2{font:800 clamp(23px,6vw,29px)/1.15 var(--f-d);letter-spacing:-.01em;margin:4p
 .btn-comprar{display:block;text-decoration:none;text-align:center;background:linear-gradient(180deg,#14977F,#0C7563);color:#fff;font:800 18px/1.2 var(--f-b);padding:18px;border-radius:16px;margin-top:14px;box-shadow:0 10px 22px -10px rgba(12,117,99,.9);animation:pulsa 2.2s ease-in-out infinite}
 @keyframes pulsa{50%{transform:scale(1.025)}}
 .seguro{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:12.5px;color:var(--muted);font-weight:600}
+/* página de back (oferta única de R$ 19,90) */
+.back{gap:26px}
+.back .alerta{background:var(--at);color:#fff;text-align:center;font:800 15px/1.2 var(--f-b);letter-spacing:.04em;padding:12px;border-radius:12px;animation:pulsa 1.6s ease-in-out infinite}
+.back .foto-b{width:110px;height:110px;border-radius:50%;overflow:hidden;background:#E8F3EF;display:grid;place-items:center;font-size:56px;box-shadow:0 0 0 4px #fff,0 10px 24px -10px rgba(0,0,0,.4)}
+.back .foto-b img{width:100%;height:100%;object-fit:cover}
+.back .lead{margin:0;font-size:16px;color:var(--muted)}
+.oferta-box.urg{border-color:var(--at)}
+.oferta-box .tag-unica{display:inline-block;background:var(--at);color:#fff;font:800 12px/1 var(--f-b);letter-spacing:.08em;padding:8px 12px;border-radius:99px;margin-bottom:10px}
+.oferta-box .de s{color:var(--at)}
+.relogio{margin-top:12px;background:var(--at-soft);color:var(--at);border-radius:12px;padding:10px;font-weight:600;font-size:15px}
+.relogio b{font:800 22px/1 var(--f-d);font-variant-numeric:tabular-nums;margin-left:4px}
+.back .aviso{margin:0;text-align:center;font-size:14px;font-weight:700;color:var(--at)}
+.recusa{display:block;text-align:center;margin-top:14px;font-size:13.5px;color:var(--muted);text-decoration:underline}
 .faq details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .faq summary{font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:10px}
 .faq summary::after{content:"+";color:var(--accent);font-weight:800}
@@ -905,14 +918,83 @@ function telaOferta(d) {
   addEventListener('scroll', ver, { passive: true }); ver();
   armarBack();
 }
-// back redirect (24/11): quem aperta "voltar" na TSL vai para o checkout de R$ 19,90 (com as UTMs do anúncio)
+// página de back (24/11): quem aperta "voltar" na TSL vê UMA vez a oferta de R$ 19,90, com 10 min no relógio.
+// "Não aparece de novo" é verdade: depois de vista (localStorage) ela nunca mais é armada nesse aparelho, e o relógio não reinicia.
 const CHECKOUT_BACK = URLP.get('checkoutBack') || 'https://pay.wiapy.com/PKMVeHCXKOC'; // Wiapy: Vovocão R$ 19,90
+const BACK_MIN = 10, BACK_CHAVE = 'vovocao:back';
+const lerLS = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const gravarLS = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 let backArmado = false;
 function armarBack() {
-  if (backArmado) return; backArmado = true;
-  const link = CHECKOUT_BACK + (Object.keys(UTM).length ? (CHECKOUT_BACK.includes('?') ? '&' : '?') + new URLSearchParams(UTM) : '');
+  if (backArmado || (lerLS(BACK_CHAVE) && !URLP.get('teste'))) return; backArmado = true;
   try { history.pushState({ vovocaoBack: 1 }, '', location.href); } catch (e) { return; }
-  addEventListener('popstate', () => { enviar('back_redirect', 'oferta'); setTimeout(() => location.replace(link), 120); });
+  addEventListener('popstate', function aoVoltar() { removeEventListener('popstate', aoVoltar); telaBack(); });
+}
+function telaBack() {
+  const ini = +lerLS(BACK_CHAVE) || Date.now(); gravarLS(BACK_CHAVE, String(ini));
+  telaDesde = Date.now(); enviar('etapa', 'back');
+  const { res } = calcularRadar();
+  const nome = esc(N()), oN = `${o()} ${nome}`, doN = `d${o()} ${nome}`;
+  const fotoId = (st.racaOrigem === 'srd' || usaPorte() || !st.ficha) ? 'srd' : st.ficha.mix ? st.ficha.ids[0].replace(/^srd-.*/, 'srd') : st.ficha.id;
+  const nAt = Object.values(res).filter(r => r.st === 'atencao').length;
+  const comUtm = (u) => u + (Object.keys(UTM).length ? (u.includes('?') ? '&' : '?') + new URLSearchParams(UTM) : '');
+  const link = comUtm(CHECKOUT_BACK), linkCheio = comUtm(CHECKOUT);
+  window.scrollTo(0, 0); app.classList.add('longa'); document.getElementById('rodape').hidden = true;
+  app.innerHTML = `<div class="tela"><div class="tsl back">
+    <div class="alerta">⚠️ ESPERA! Não feche esta página</div>
+    <section style="text-align:center;align-items:center">
+      <div class="foto-b">${icone({ img: 'img/raca-' + fotoId + '.webp', e: '🐶' }).replace(/^<span class="ic">|<\/span>$/g, '')}</div>
+      <h1 style="margin:4px 0 0">Quanto vale a vida d${oN} pra você?</h1>
+      <p class="lead">Você respondeu cada pergunta pensando n${oN}. Isso já diz muito.</p>
+    </section>
+    <section>
+      <div class="silencio">
+        <div class="big">${Ele()} passou a vida te esperando na porta.</div>
+        <p>Agora é a sua vez de olhar por ${ele()}. ${Ele()} não reclama, não mostra onde dói e não vai te avisar quando alguma coisa mudar.${nAt ? ` O diagnóstico já achou <b class="n">${nAt} sinal${nAt > 1 ? 'is' : ''} em atenção</b>.` : ''}</p>
+      </div>
+      <p class="lead" style="text-align:center">Cada dia sem olhar esses sinais é um dia a menos para perceber cedo.</p>
+    </section>
+    <section>
+      <div class="oferta-box urg">
+        <div class="tag-unica">OFERTA ÚNICA · SÓ NESTA PÁGINA</div>
+        <div class="de">De <s>R$ 47</s> por</div>
+        <div class="preco"><small>R$</small>19,90</div>
+        <span class="unico">Pagamento único · o mesmo plano completo</span>
+        <div class="relogio" id="relogio">Esse valor some em <b id="rel">${BACK_MIN}:00</b></div>
+        <a class="btn-comprar" id="comprarBack" href="${esc(link)}">Sim, quero cuidar d${oN} por R$ 19,90 →</a>
+        <div class="seguro"><span>🔒 Compra segura</span><span>✅ Garantia de 7 dias</span><span>📱 Acesso na hora</span></div>
+      </div>
+      <p class="aviso">Se você sair, esta oferta não aparece de novo. Ela é mostrada uma vez só, aqui.</p>
+    </section>
+    <section>
+      <div class="kick">Por R$ 19,90 você leva tudo</div>
+      <ul class="checks-l rec">
+        <li><i>📱</i><span><b>App Vovocão com o perfil ${doN}</b><small>Já montado com as respostas do diagnóstico</small></span></li>
+        <li><i>⏱️</i><span><b>Plano diário de 10 minutos</b><small>Pela raça e pela idade ${doN}</small></span></li>
+        <li><i>📡</i><span><b>Check-up semanal com o radar</b><small>O que melhorou, o que piorou</small></span></li>
+        <li><i>🧭</i><span><b>+40 sinais explicados</b><small>"É da idade ou é alerta?"</small></span></li>
+        <li><i>🚨</i><span><b>Emergência: o que fazer agora</b><small>Para as 2 da manhã de domingo</small></span></li>
+      </ul>
+      <p class="lead" style="text-align:center">Pagamento único. Dá menos de 6 centavos por dia no primeiro ano.</p>
+      <a class="btn-comprar" href="${esc(link)}" data-comprar-back>Quero o plano d${oN} →</a>
+      <a class="recusa" id="recusa" href="#">Não, prefiro continuar sem saber o que ${ele()} sente</a>
+    </section>
+  </div></div>`;
+  Som.brilho();
+  app.querySelectorAll('#comprarBack,[data-comprar-back]').forEach(a => a.addEventListener('click', () => enviar('checkout_clique', 'back', { preco: 19.9 })));
+  app.querySelector('#recusa').addEventListener('click', (ev) => { ev.preventDefault(); enviar('back_recusa', 'back'); history.back(); });
+  // relógio de 10 min contado de quando a página apareceu pela 1.ª vez; acabou = o botão volta para o preço normal
+  const rel = app.querySelector('#rel'), fim = ini + BACK_MIN * 60000;
+  const passo = () => {
+    const s = Math.max(0, Math.round((fim - Date.now()) / 1000));
+    rel.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    if (s) return;
+    clearInterval(tic);
+    app.querySelector('#relogio').innerHTML = '<b>Oferta de R$ 19,90 encerrada.</b> O plano continua por R$ 47.';
+    app.querySelectorAll('#comprarBack,[data-comprar-back]').forEach(a => { a.href = linkCheio; a.textContent = `Quero o plano d${oN} por R$ 47 →`; });
+    app.querySelector('.preco').innerHTML = '<small>R$</small>47'; app.querySelector('.de').textContent = 'Preço normal';
+  };
+  const tic = setInterval(passo, 1000); passo();
 }
 
 // atalho de teste: ?teste=<id da ficha>&nome=Thor&idade=11&sexo=m abre direto a TSL (só para revisar a página)
