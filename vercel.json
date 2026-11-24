@@ -23,7 +23,7 @@
   "rewrites": [
     {
       "source": "/tsl",
-      "destination": "/index.html"
+      "destination": "/"
     }
   ]
 }
