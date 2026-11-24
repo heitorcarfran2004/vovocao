@@ -459,8 +459,6 @@ function telaAbertura(d) {
     <span class="selo">${a.selo}</span>
     <h1>${a.h}</h1>
     <div class="hero"><img src="img/hero.webp" alt="Cães idosos de várias raças" onerror="this.parentNode.innerHTML='<span style=&quot;font-size:64px&quot;>🐶🐕🐩</span>'"></div>
-    <div class="checks"><span>✅ Teste gratuito</span><span>✅ Leva 2 minutos</span><span>✅ Resultado na hora</span></div>
-    <p class="sub" style="margin-top:10px">${a.s}</p>
     <button class="btn" id="ir" type="button">Começar o diagnóstico gratuito</button>
     <p class="dica">Baseado em estudos com mais de 40 mil cães</p></div>`;
   d.querySelector('#ir').onclick = () => { enviar('inicio', 'abertura', { v: V }); proximo(); };

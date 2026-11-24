@@ -69,6 +69,19 @@ begin
            count(distinct sid) filter (where tipo = 'checkout_clique') as checkout
     from ev group by 1 order by 2 desc limit 30
   ),
+  funil as (
+    select count(distinct sid) as visitas,
+           count(distinct sid) filter (where tipo = 'inicio') as comecaram,
+           count(distinct sid) filter (where tipo = 'radar') as radar,
+           count(distinct sid) filter (where tipo = 'vsl_play') as vsl_play,
+           count(distinct sid) filter (where tipo = 'carga_fim') as vsl_90,
+           count(distinct sid) filter (where tipo = 'oferta') as oferta,
+           count(distinct sid) filter (where tipo = 'checkout_clique' and coalesce(etapa, 'oferta') <> 'back') as checkout,
+           count(distinct sid) filter (where tipo = 'etapa' and etapa = 'back') as back,
+           count(distinct sid) filter (where tipo = 'checkout_clique' and etapa = 'back') as back_checkout,
+           count(distinct sid) filter (where tipo = 'back_recusa') as back_recusa
+    from ev
+  ),
   dias as (
     select to_char(d, 'DD/MM') as dia, sessoes, checkout from (
       select date_trunc('day', criado_em at time zone 'America/Sao_Paulo') as d,
@@ -78,6 +91,7 @@ begin
   )
   select json_build_object(
     'total_sessoes', (select count(distinct sid) from ev),
+    'funil', (select row_to_json(f) from funil f),
     'etapas', (select coalesce(json_agg(e order by e.ordem nulls last, e.sessoes desc), '[]') from etapas e),
     'respostas', (select coalesce(json_agg(x order by x.etapa, x.sessoes desc), '[]') from respostas x),
     'variantes', (select coalesce(json_agg(v order by v.variante), '[]') from variantes v),

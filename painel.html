@@ -53,7 +53,28 @@ details.perg summary{cursor:pointer;font-weight:700}
 .dias{display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:10px}
 .dias div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)}
 .dias div i{width:100%;max-width:34px;background:var(--verde);border-radius:5px 5px 0 0;min-height:2px}
-@media (max-width:640px){.funil .lin{grid-template-columns:110px 1fr 46px 56px}.funil .lin .seg{display:none}}
+/* funil visual */
+.fv{display:grid;grid-template-columns:1fr minmax(0,260px);gap:16px;align-items:start}
+.fv-pilha{display:flex;flex-direction:column;align-items:center}
+.fv-pilha{--min:38%}
+.fv-deg{width:calc(var(--min) + (100% - var(--min)) * var(--r));position:relative;border-radius:12px;color:#fff;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:52px}
+.fv-deg b{font:800 22px/1 var(--f-d);font-variant-numeric:tabular-nums}
+.fv-deg span{font:600 13.5px/1.2 var(--f-b)}
+.fv-deg small{display:block;font:500 11.5px var(--f-b);opacity:.85;margin-top:2px}
+.fv-seta{font:600 12px var(--f-b);color:var(--muted);padding:5px 0;text-align:center}
+.fv-seta .ok{color:var(--verde);font-weight:800}
+.fv-seta .perde{color:var(--at);font-weight:700}
+.fv-lado{display:flex;flex-direction:column;gap:10px}
+.fv-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:13px}
+.fv-box h3{margin:0 0 8px;font:800 14px/1.2 var(--f-d)}
+.fv-box .l{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--soft)}
+.fv-box .l:last-child{border-bottom:0}
+.fv-box .l b{font-variant-numeric:tabular-nums}
+.fv-box.back{border-left:4px solid var(--at)}
+.fv-box.tot{border-left:4px solid var(--verde)}
+.fv-total{font:800 30px/1 var(--f-d);color:var(--verde)}
+@media (max-width:760px){.fv{grid-template-columns:1fr}}
+@media (max-width:640px){.fv-pilha{--min:70%}.fv-deg b{font-size:19px}.fv-deg span{font-size:12.5px}.funil .lin{grid-template-columns:110px 1fr 46px 56px}.funil .lin .seg{display:none}}
 </style>
 </head>
 <body>
@@ -68,7 +89,7 @@ const NOMES = { abertura: 'Abertura', nome: 'Nome do cão', sexo: 'Macho/fêmea'
   porta: 'Recebe na porta?', sono: 'Sono', apetite: 'Apetite', agua: 'Água e xixi', patas: 'Patas (múltipla)', consulta: 'Última consulta',
   'sabia-raca': 'Você sabia? (raça)', 'raca-1': 'Pergunta da raça 1', 'raca-2': 'Pergunta da raça 2', noite: 'Madrugada', respiracao: 'Respiração', caroco: 'Caroço', gengiva: 'Gengiva', remedio: 'Remédio de gente',
   animo: 'Ânimo hoje', saudade: 'Do que sente falta', 'sabia-qualidade': 'Você sabia? (qualidade)', 'da-idade': '"É da idade"', madrugada: '2 da manhã', 'sinais-todos': 'Viu todos os sinais?', desejo: 'O que quer viver',
-  radar: 'Radar (resultado)', diagnostico: 'VSL (carregando)', oferta: 'Oferta (TSL)' };
+  radar: 'Radar (resultado)', diagnostico: 'VSL (carregando)', oferta: 'Oferta (TSL)', back: 'Página de back (R$ 19,90)' };
 const nm = (e) => NOMES[e] || e;
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const pct = (a, b) => b ? Math.round(1000 * a / b) / 10 : 0;
@@ -107,8 +128,48 @@ function ligarFiltros() {
   const s = app.querySelector('#var'); if (s) s.onchange = () => { variante = s.value; carregar(); };
 }
 
+// funil de vendas desenhado: visita → começou → radar → play → VSL 90% → oferta → clicou comprar, com o back ao lado
+function funilVisual(d, v) {
+  const f = d.funil || { visitas: d.total_sessoes, comecaram: v.comecaram, radar: v.radar, vsl_90: v.vsl_90, oferta: v.oferta, checkout: v.checkout };
+  const novo = !!d.funil; // SQL novo já traz play, back e clique separado
+  const degraus = [
+    ['visitas', 'Visitas', 'entraram no site'],
+    ['comecaram', 'Começaram o quiz', 'clicaram em começar'],
+    ['radar', 'Viram o radar', 'terminaram as perguntas'],
+    novo ? ['vsl_play', 'Deram play na VSL', 'apertaram o play'] : null,
+    ['vsl_90', 'Assistiram 90% da VSL', 'o botão liberou'],
+    ['oferta', 'Chegaram na oferta', 'viram a TSL de R$ 47'],
+    ['checkout', 'Clicaram em comprar', 'foram pro checkout de R$ 47'],
+  ].filter(Boolean).map(([k, t, s]) => ({ k, t, s, n: f[k] || 0 }));
+  const topo = Math.max(1, degraus[0].n);
+  const cor = (i) => { const a = [12, 117, 99], b = [4, 60, 50], p = i / Math.max(1, degraus.length - 1); return `rgb(${a.map((x, j) => Math.round(x + (b[j] - x) * p)).join(',')})`; };
+  let pilha = '';
+  degraus.forEach((g, i) => {
+    if (i) { const ant = degraus[i - 1].n, passou = pct(g.n, ant);
+      pilha += `<div class="fv-seta">↓ <span class="ok">${ant ? passou + '% passaram' : '-'}</span>${ant && ant > g.n ? ` · <span class="perde">perdeu ${ant - g.n}</span>` : ''}</div>`; }
+    // largura proporcional, com um mínimo (--min) para o texto caber
+    pilha += `<div class="fv-deg" style="--r:${Math.min(1, g.n / topo).toFixed(3)};background:${cor(i)}"><span>${g.t}<small>${g.s}</small></span><b>${g.n}</b></div>`;
+  });
+  const cliquesTot = (f.checkout || 0) + (f.back_checkout || 0);
+  let lado = `<div class="fv-box tot"><h3>Visita → clique em comprar</h3><div class="fv-total">${pct(cliquesTot, f.visitas)}%</div>
+    <div style="color:var(--muted);margin-top:4px">${cliquesTot} cliques em comprar de ${f.visitas} visitas${novo ? ` (R$ 47: ${f.checkout || 0} · R$ 19,90: ${f.back_checkout || 0})` : ''}</div></div>
+    <div class="fv-box"><h3>Taxas que importam</h3>
+      <div class="l"><span>Visita → começou</span><b>${pct(f.comecaram, f.visitas)}%</b></div>
+      <div class="l"><span>Começou → radar</span><b>${pct(f.radar, f.comecaram)}%</b></div>
+      ${novo ? `<div class="l"><span>Radar → play na VSL</span><b>${pct(f.vsl_play, f.radar)}%</b></div><div class="l"><span>Play → 90% da VSL</span><b>${pct(f.vsl_90, f.vsl_play)}%</b></div>` : `<div class="l"><span>Radar → 90% da VSL</span><b>${pct(f.vsl_90, f.radar)}%</b></div>`}
+      <div class="l"><span>Oferta → clicou comprar</span><b>${pct(f.checkout, f.oferta)}%</b></div></div>`;
+  if (novo) lado += `<div class="fv-box back"><h3>Página de back (R$ 19,90)</h3>
+      <div class="l"><span>Tentaram sair da oferta</span><b>${f.back || 0}</b></div>
+      <div class="l"><span>Clicaram no R$ 19,90</span><b>${f.back_checkout || 0} <span style="color:var(--verde)">(${pct(f.back_checkout, f.back)}%)</span></b></div>
+      <div class="l"><span>Recusaram</span><b>${f.back_recusa || 0}</b></div>
+      <div class="l"><span>Back resgatou da oferta</span><b>${pct(f.back_checkout, f.oferta)}%</b></div></div>`;
+  else lado += `<div class="fv-box back"><h3>Página de back</h3><div style="color:var(--muted)">Os números do back e do play aparecem depois que o SQL novo for rodado no Supabase.</div></div>`;
+  return `<h2>Funil de vendas</h2><div class="fv"><div class="card fv-pilha">${pilha}
+    <p style="font-size:12px;color:var(--muted);margin:10px 0 0;text-align:center">Clique em comprar ≠ venda paga. As vendas pagas estão na Wiapy.</p></div><div class="fv-lado">${lado}</div></div>`;
+}
+
 function desenhar(d) {
-  const etapas = (d.etapas || []).filter(e => e.etapa).sort((a, b) => (a.ordem ?? 99) - (b.ordem ?? 99));
+  const etapas = (d.etapas || []).filter(e => e.etapa && e.etapa !== 'back').sort((a, b) => (a.ordem ?? 99) - (b.ordem ?? 99));
   const v = (d.variantes || []).reduce((a, x) => { for (const k of ['comecaram', 'radar', 'vsl_90', 'oferta', 'checkout']) a[k] = (a[k] || 0) + (x[k] || 0); return a; }, {});
   const topo = etapas[0] ? etapas[0].sessoes : 0;
   // quedas de uma etapa para a seguinte
@@ -123,6 +184,7 @@ function desenhar(d) {
     <div class="kpi"><b>${v.vsl_90 || 0}</b><span>VSL até 90%</span> <i>${pct(v.vsl_90, v.radar)}%</i></div>
     <div class="kpi"><b>${v.oferta || 0}</b><span>chegaram na oferta</span> <i>${pct(v.oferta, v.comecaram)}%</i></div>
     <div class="kpi"><b>${v.checkout || 0}</b><span>clicaram em comprar</span> <i>${pct(v.checkout, v.oferta)}% da oferta</i></div></div>`;
+  h += funilVisual(d, v);
   if (piores.length) h += `<h2>Onde mais perde gente</h2><div class="card alerta"><ol style="margin:0;padding-left:20px">${piores.map(x => `<li><b>${esc(nm(x.ant.etapa))} → ${esc(nm(x.e.etapa))}</b>: perde <b style="color:var(--at)">${x.q}%</b> (${x.ant.sessoes} → ${x.e.sessoes})</li>`).join('')}</ol></div>`;
   h += `<h2>Funil por etapa</h2><div class="card funil"><div class="lin cab"><span>Etapa</span><span>Chegaram</span><span class="num">Qtde</span><span class="num">Perda</span><span class="num seg">Seg.</span></div>
     ${etapas.map((e, i) => { const q = i ? pct(etapas[i - 1].sessoes - e.sessoes, etapas[i - 1].sessoes) : 0; const cl = q >= 15 ? 'ruim' : q >= 7 ? 'media' : 'boa';
