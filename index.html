@@ -903,6 +903,16 @@ function telaOferta(d) {
   const fixo = d.querySelector('#fixo'), caixa = d.querySelector('.oferta-box');
   const ver = () => { const r = caixa.getBoundingClientRect(); fixo.classList.toggle('on', scrollY > 420 && !(r.top < innerHeight && r.bottom > 0)); };
   addEventListener('scroll', ver, { passive: true }); ver();
+  armarBack();
+}
+// back redirect (24/11): quem aperta "voltar" na TSL vai para o checkout de R$ 19,90 (com as UTMs do anúncio)
+const CHECKOUT_BACK = URLP.get('checkoutBack') || 'https://pay.wiapy.com/PKMVeHCXKOC'; // Wiapy: Vovocão R$ 19,90
+let backArmado = false;
+function armarBack() {
+  if (backArmado) return; backArmado = true;
+  const link = CHECKOUT_BACK + (Object.keys(UTM).length ? (CHECKOUT_BACK.includes('?') ? '&' : '?') + new URLSearchParams(UTM) : '');
+  try { history.pushState({ vovocaoBack: 1 }, '', location.href); } catch (e) { return; }
+  addEventListener('popstate', () => { enviar('back_redirect', 'oferta'); setTimeout(() => location.replace(link), 120); });
 }
 
 // atalho de teste: ?teste=<id da ficha>&nome=Thor&idade=11&sexo=m abre direto a TSL (só para revisar a página)
