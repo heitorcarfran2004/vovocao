@@ -14,6 +14,8 @@ http.createServer((req, res) => {
       res.writeHead(204); res.end();
     }); return;
   }
+  if (p === '/tsl/') { res.writeHead(301, { Location: '/tsl' }); return res.end(); }
+  if (p === '/tsl') p = '/index.html'; // página só para revisar a TSL
   if (p === '/app') { res.writeHead(301, { Location: '/app/' }); return res.end(); }
   if (p.endsWith('/')) p += 'index.html';
   const arq = path.join(__dirname, p);

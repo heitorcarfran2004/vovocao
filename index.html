@@ -8,9 +8,9 @@
 <script src="https://cashflow.mentoriaprocesso.com/t/p.js?w=8bf6383c-9940-4837-a9d9-6e3cc6dcce06&o=943ff1ca-3eaf-4a72-9fd6-ef0fe23383e5" data-offer="943ff1ca-3eaf-4a72-9fd6-ef0fe23383e5" data-nowprocket data-no-minify="1" data-no-optimize="1" data-cfasync="false" async></script>
 <!-- vTurb (VSL): carregamento rápido do player -->
 <script>!function(i,n){i._plt=i._plt||(n&&n.timeOrigin?n.timeOrigin+n.now():Date.now())}(window,performance);</script>
-<link rel="preload" href="https://scripts.converteai.net/59fb2471-bbf9-48ae-ad59-009b3aba8bd1/players/6b03c16d7d02723f206fe6b1/v4/player.js" as="script">
+<link rel="preload" href="https://scripts.converteai.net/59fb2471-bbf9-48ae-ad59-009b3aba8bd1/players/6b0608fae34a7e03d4e5fba7/v4/player.js" as="script">
 <link rel="preload" href="https://scripts.converteai.net/lib/js/smartplayer-wc/v4/smartplayer.js" as="script">
-<link rel="preload" href="https://cdn.converteai.net/59fb2471-bbf9-48ae-ad59-009b3aba8bd1/6b03c15d74e05924edc03463/main.m3u8" as="fetch">
+<link rel="preload" href="https://cdn.converteai.net/59fb2471-bbf9-48ae-ad59-009b3aba8bd1/6b0608ed9d1c09edcda05930/main.m3u8" as="fetch">
 <link rel="dns-prefetch" href="https://cdn.converteai.net">
 <link rel="dns-prefetch" href="https://scripts.converteai.net">
 <link rel="dns-prefetch" href="https://images.converteai.net">
@@ -238,6 +238,44 @@ h2{font:800 clamp(23px,6vw,29px)/1.15 var(--f-d);letter-spacing:-.01em;margin:4p
 .relogio b{font:800 22px/1 var(--f-d);font-variant-numeric:tabular-nums;margin-left:4px}
 .back .aviso{margin:0;text-align:center;font-size:14px;font-weight:700;color:var(--at)}
 .recusa{display:block;text-align:center;margin-top:14px;font-size:13.5px;color:var(--muted);text-decoration:underline}
+/* TSL v2 (24/11): gatilhos vermelhos no risco, verde só na solução */
+.tsl2{--vm:#D62D20;--vm-esc:#A61E14;--vm-soft:#FDE8E6}
+.tsl2 .alerta-topo{background:var(--vm);color:#fff;font:800 13px/1.2 var(--f-b);letter-spacing:.04em;text-transform:uppercase;text-align:center;padding:11px 14px;border-radius:12px;box-shadow:0 10px 22px -14px rgba(214,45,32,.9);animation:pulsoVm 2.4s ease-in-out infinite}
+@keyframes pulsoVm{0%,100%{box-shadow:0 10px 22px -14px rgba(214,45,32,.9)}50%{box-shadow:0 10px 30px -8px rgba(214,45,32,.75)}}
+@media (prefers-reduced-motion:reduce){.tsl2 .alerta-topo{animation:none}}
+.tsl2 h1 .vm,.tsl2 .vm{color:var(--vm)}
+.tsl2 .kick.vm{color:var(--vm)}
+.tsl2 .lead2{font-size:15.5px;color:var(--muted);margin:8px 0 0;font-style:italic;text-wrap:balance}
+.tsl2 .perfil .tile.alerta-t{background:var(--vm);box-shadow:0 0 0 2px rgba(255,255,255,.35) inset}
+.sinal-vm{background:var(--vm-soft);border:1.5px solid rgba(214,45,32,.35);border-left:5px solid var(--vm);border-radius:14px;padding:13px 14px}
+.sinal-vm .cab{display:flex;align-items:center;gap:9px}
+.sinal-vm .cab b{font:800 16.5px/1.2 var(--f-d);color:var(--vm-esc);flex:1}
+.sinal-vm .ic-vm{flex:none;width:24px;height:24px;border-radius:50%;background:var(--vm);color:#fff;display:grid;place-items:center;font:900 15px/1 var(--f-b)}
+.sinal-vm .tag{flex:none;font:800 10.5px/1 var(--f-b);letter-spacing:.06em;text-transform:uppercase;background:var(--vm);color:#fff;padding:5px 8px;border-radius:99px}
+.sinal-vm .voce{margin-top:8px;font-size:13.5px;color:var(--vm-esc);font-weight:600}
+.sinal-vm .voce i{font-style:normal;font-weight:800}
+.sinal-vm p{margin:6px 0 0;font-size:14.5px;line-height:1.4;color:var(--ink)}
+.obs-l{font-size:13.5px;color:var(--muted);background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:10px 12px}
+.obs-l b{color:var(--ob,#B07A12)}
+.tsl2 .silencio{background:linear-gradient(160deg,#2A0F0C,#14201B)}
+.tsl2 .silencio .big{color:#fff}
+.tsl2 .dor{border-left-color:var(--vm)}
+.tsl2 .dor .dado{color:var(--vm)}
+.tsl2 .dor .e{background:var(--vm-soft)}
+.tsl2 .dor.quente{background:var(--vm-soft);border-color:rgba(214,45,32,.35)}
+.tsl2 .dor .marcou{background:var(--vm);color:#fff}
+.tsl2 .vs .sem{background:var(--vm-soft)} .tsl2 .vs .sem h4{color:var(--vm)}
+.ancora{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px}
+.ancora .lin{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.ancora .lin s{color:var(--vm,#D62D20);font-weight:700;white-space:nowrap}
+.ancora .lin.forte{border-bottom:0;font-weight:800;font-size:15.5px}
+.ancora .lin.forte b{color:var(--accent);font:800 20px/1 var(--f-d);white-space:nowrap}
+.ancora p{margin:8px 0 0;font-size:13px;color:var(--muted)}
+.garantia{display:flex;gap:14px;align-items:center;background:var(--accent-soft);border-radius:18px;padding:14px 16px}
+.garantia .selo-g{flex:none;width:64px;height:64px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;align-content:center;font:800 26px/1 var(--f-d);box-shadow:0 0 0 4px #fff,0 0 0 6px var(--accent)}
+.garantia .selo-g small{font:700 10px/1 var(--f-b);text-transform:uppercase;letter-spacing:.06em}
+.garantia b{font:800 16px/1.2 var(--f-d)}
+.garantia p{margin:4px 0 0;font-size:13.5px;color:var(--muted)}
 .faq details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .faq summary{font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:10px}
 .faq summary::after{content:"+";color:var(--accent);font-weight:800}
@@ -290,8 +328,9 @@ const SINAIS = [
 let telaDesde = Date.now();
 const UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].reduce((a, k) => { const v = URLP.get(k); if (v) a[k] = v; return a; }, {});
 const APARELHO = /Mobi|Android|iPhone/i.test(navigator.userAgent) ? 'celular' : 'computador';
+const REVISAO_TSL = /\/tsl\/?$/.test(location.pathname); // /tsl = página só para revisar a TSL
 function enviar(ev, etapa, dados) {
-  if (URLP.get('teste')) return; // atalho de revisão não suja o painel
+  if (URLP.get('teste') || REVISAO_TSL) return; // atalho de revisão não suja o painel
   const r = dados && dados.r != null ? (Array.isArray(dados.r) ? dados.r.join(', ') : String(dados.r)) : (dados && dados.texto) || null;
   const corpo = JSON.stringify({ quiz: 'vovocao', variante: 'v' + V, sid, t: Date.now(), v: V, ev, tipo: ev, etapa, ordem: typeof E !== 'undefined' ? E.findIndex(x => x.id === etapa) : null,
     resposta: r, ms: Date.now() - telaDesde, dispositivo: APARELHO, ...UTM, dados: dados || null });
@@ -741,13 +780,13 @@ function telaVsl(d) {
   d.innerHTML = `<h2>Analisando as respostas e gerando o diagnóstico detalhado d${o()} ${esc(N())}</h2>
     <div class="carga" role="progressbar" aria-label="Gerando o diagnóstico"><i id="cg"></i></div><div class="etapa-carga" id="msg">${msgs[0]}</div>
     <p style="font-weight:700;margin:18px 0 0">Enquanto isso, assista este vídeo:</p>
-    <div style="position:relative;margin:12px auto 0;width:80%;max-width:320px;border-radius:20px;overflow:hidden;box-shadow:0 16px 34px -20px rgba(0,0,0,.55);transform:translateZ(0)"><vturb-smartplayer id="vid-6b03c16d7d02723f206fe6b1" style="display: block; margin: 0 auto; width: 100%; max-width: 400px;"><div class="vturb-player-placeholder" style="position: relative; width: 100%; padding: 177.77777777777777% 0 0; z-index: 0; background-color: black;"></div></vturb-smartplayer><button class="play-vsl" id="playVsl" type="button" aria-label="Assistir o vídeo"><i><svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></i>Toque para assistir</button></div>
+    <div style="position:relative;margin:12px auto 0;width:80%;max-width:320px;border-radius:20px;overflow:hidden;box-shadow:0 16px 34px -20px rgba(0,0,0,.55);transform:translateZ(0)"><vturb-smartplayer id="vid-6b0608fae34a7e03d4e5fba7" style="display: block; margin: 0 auto; width: 100%; max-width: 400px;"><div class="vturb-player-placeholder" style="position: relative; width: 100%; padding: 177.77777777777777% 0 0; z-index: 0; background-color: black;"></div></vturb-smartplayer><button class="play-vsl" id="playVsl" type="button" aria-label="Assistir o vídeo"><i><svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></i>Toque para assistir</button></div>
     <button class="btn esconder" id="ir" type="button" style="display:none">Ver o diagnóstico e o plano d${o()} ${esc(N())}</button>`;
   // VSL no vTurb: o script do player entra uma vez só
-  if (!document.getElementById('vturb-player-js')) { const s = document.createElement('script'); s.id = 'vturb-player-js'; s.src = 'https://scripts.converteai.net/59fb2471-bbf9-48ae-ad59-009b3aba8bd1/players/6b03c16d7d02723f206fe6b1/v4/player.js'; s.async = true; document.head.appendChild(s); }
-  // O botão libera aos 90% da VSL (4 min 05 s → 220 s de vídeo ASSISTIDO), pelo código de atraso oficial do vTurb (displayHiddenElements).
+  if (!document.getElementById('vturb-player-js')) { const s = document.createElement('script'); s.id = 'vturb-player-js'; s.src = 'https://scripts.converteai.net/59fb2471-bbf9-48ae-ad59-009b3aba8bd1/players/6b0608fae34a7e03d4e5fba7/v4/player.js'; s.async = true; document.head.appendChild(s); }
+  // O botão libera aos 90% da VSL (VSL R$ 37, 4 min 06 s → 221 s de vídeo ASSISTIDO), pelo código de atraso oficial do vTurb (displayHiddenElements).
   // A barra acompanha o tempo do vídeo. Reserva: se o player não carregar, conta o tempo da página. Teste: ?carga=10
-  const ALVO = +URLP.get('carga') || 220;
+  const ALVO = +URLP.get('carga') || 221;
   const cg = d.querySelector('#cg'), msg = d.querySelector('#msg'), ir = d.querySelector('#ir');
   let pagina = 0, mostrado = 0, pronto = false, playerOk = false;
   const liberar = () => { if (pronto) return; pronto = true; clearInterval(tick); ir.style.display = 'block'; cg.style.width = '100%'; msg.textContent = 'Diagnóstico pronto.'; enviar('carga_fim', 'diagnostico'); };
@@ -777,12 +816,25 @@ function telaVsl(d) {
   }, 1000);
   ir.onclick = () => { clearInterval(tick); proximo(); };
 }
-// ---------- TSL: perfil → compatibilidade → dores (dados da raça) → antes × depois → benefícios → o que recebe + botão ----------
-// Link do checkout: ?checkout=URL ou a constante. Vazio = abre a demo do app (fase de teste do funil).
-const CHECKOUT = URLP.get('checkout') || 'https://pay.wiapy.com/yn4UYFEZDXHB'; // Wiapy: Vovocão: Plano Mais Anos (R$ 47)
+// ---------- TSL v2 (24/11): vende o RISCO. Resultado do diagnóstico em vermelho → oferta cedo → ameaças da raça → o que tem dentro → âncora + garantia → oferta ----------
+// Preço: ?preco=47 volta ao antigo. Link do checkout: ?checkout=URL ou o da tabela CHECKOUTS (o de R$ 37 entra quando a oferta for criada na Wiapy).
+const PRECO = +(URLP.get('preco') || 37);
+const CHECKOUTS = { 47: 'https://pay.wiapy.com/yn4UYFEZDXHB', 37: 'https://pay.wiapy.com/RqkbJQnZUbs' }; // Wiapy: Vovocão: Plano Mais Anos (37 = oferta no mesmo checkout)
+const CHECKOUT = URLP.get('checkout') || CHECKOUTS[PRECO] || CHECKOUTS[47];
+const precoTxt = (n) => String(n).replace('.', ',');
 // o app (entregável) mora em outro domínio; o cadastro do cão vai no link (?perfil=base64), e o app grava no localStorage dele
 const APP_URL = location.hostname === 'localhost' ? 'app/' : 'https://vovocao-app.vercel.app/';
 function linkApp() { try { const p = localStorage.getItem('maisanos:perfil'); if (!p) return APP_URL; const b = btoa(unescape(encodeURIComponent(p))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); return APP_URL + '?perfil=' + b; } catch (e) { return APP_URL; } }
+// o que cada sinal em atenção PODE estar dizendo (nunca diagnóstico; sempre "pode ser")
+const RISCO_SINAL = {
+  apetite: (el) => `Ficar chato pra comer quase nunca é manha. Dor na boca, enjoo e rim cansado costumam começar assim, e ${el} não tem como te contar.`,
+  agua: () => 'Beber mais água e fazer mais xixi é um dos primeiros sinais que o rim dá. Quase todo mundo acha que é o calor.',
+  patas: (el) => `Parar de subir no sofá, demorar pra levantar e escorregar costumam ser dor nas articulações. ${el.replace(/^./, c => c.toUpperCase())} não reclama: só para de fazer.`,
+  noite: () => 'Dormir quase o dia todo, ou ficar acordado de madrugada, pode ser dor ou o começo da disfunção cognitiva, o "Alzheimer" dos cães.',
+  boca: () => 'Mau hálito e tártaro não são só estética: a infecção da boca pode chegar ao coração e aos rins.',
+  respiracao: () => 'Ofegar parado ou tossir à noite pode ser o coração. Em muitos cães idosos a válvula começa a falhar sem barulho.',
+  caroco: () => 'Gengiva pálida pode ser anemia. E caroço novo precisa ser medido e acompanhado: é assim que se pega cedo.',
+};
 function telaOferta(d) {
   enviar('oferta', 'oferta');
   const { res, acompanha } = calcularRadar();
@@ -792,25 +844,38 @@ function telaOferta(d) {
   const nome = esc(N()), oN = `${o()} ${nome}`, doN = `d${o()} ${nome}`;
   const racaTxt = esc(nomeRaca()).replace(/^./, c => c.toUpperCase());
   const fotoId = (st.racaOrigem === 'srd' || usaPorte() || !st.ficha) ? 'srd' : st.ficha.mix ? st.ficha.ids[0].replace(/^srd-.*/, 'srd') : st.ficha.id;
-  const fase = st.idade >= f.idosoAos ? `Idos${o()} desde os ${f.idosoAos}` : `Fase idosa aos ${f.idosoAos}`;
+  const doPorte = usaPorte() || st.racaOrigem === 'srd' || !st.ficha;
   // dores: as da raça (mistura = as 2 primeiras de cada lado), com o número do estudo e o sinal que se vê em casa
   const T = window.TSL_RACAS || {};
   const idsDor = f.mix ? f.ids : [f.id];
   let dores = f.mix ? idsDor.flatMap(id => (T[id] || []).slice(0, 2)) : (T[f.id] || []);
   dores = dores.filter((x, i, a) => a.findIndex(y => y.nome === x.nome) === i).slice(0, 3);
   const sinalDa = (nomeDoenca) => { const p = (f.perguntas || []).find(q => q.doenca && q.doenca.replace(/ \("sopro"\)/, ' (sopro)') === nomeDoenca); return p ? p.sinal : null; };
-  const nAt = Object.values(res).filter(r => r.st === 'atencao').length, nOb = Object.values(res).filter(r => r.st === 'observar').length, nNo = 7 - nAt - nOb;
-  const emAtencao = SINAIS.filter(([k]) => res[k].st === 'atencao').map(([, nm]) => nm);
-  const compat = Math.min(98, 91 + acompanha); // mais sinais respondidos = plano mais ajustado
-  const grupo = usaPorte() || st.racaOrigem === 'srd' || !st.ficha ? `cães de porte ${porteTxt()}` : (st.ficha.mix ? 'essa mistura' : esc(f.curto || nomeRaca()));
-  const prevTxt = st.racaOrigem === 'srd' || usaPorte() ? `as doenças do porte ${porteTxt()}` : `as doenças d${st.ficha && st.ficha.mix ? 'essa mistura' : (/^[aeiou]/i.test(f.curto) ? 'o ' : 'o ') + esc(f.curto)}`;
+  // ameaça ligada ao que ela marcou vem primeiro
+  dores.sort((a, b) => { const m = (x) => { const s = sinalDa(x.nome); return s && res[s] && res[s].st === 'atencao' ? 0 : 1; }; return m(a) - m(b); });
+  const atencao = SINAIS.filter(([k]) => res[k].st === 'atencao'), observar = SINAIS.filter(([k]) => res[k].st === 'observar');
+  const nAt = atencao.length, sinaisTxt = `${nAt} sina${nAt > 1 ? 'is' : 'l'} de alerta`;
+  // o que ela marcou, nas palavras da resposta (quando a resposta diz alguma coisa além de sim/não)
+  const marcou = (k) => { const chave = Object.keys(st.resp).find(c => c.startsWith('sinal:' + k + ':') && st.resp[c] === 'atencao'); const et = chave && chave.split(':')[2]; const r = et && st.resp[et];
+    return r && r.length > 9 ? r.split(' | ').filter(x => x.length > 3).join(' · ') : null; };
+  const grupo = doPorte ? `cães de porte ${porteTxt()}` : (st.ficha.mix ? 'essa mistura' : esc(f.curto || nomeRaca()));
+  const prevTxt = st.racaOrigem === 'srd' || usaPorte() ? `as doenças do porte ${porteTxt()}` : `as doenças d${st.ficha && st.ficha.mix ? 'essa mistura' : 'o ' + esc(f.curto)}`;
+  const centavos = Math.ceil(PRECO * 100 / 365);
   // as UTMs do anúncio vão junto para o checkout (rastreio da venda por criativo)
   const linkComprar = CHECKOUT ? CHECKOUT + (Object.keys(UTM).length ? (CHECKOUT.includes('?') ? '&' : '?') + new URLSearchParams(UTM) : '') : linkApp();
+  const caixa = (id, titulo) => `<div class="oferta-box"${id ? ` id="${id}"` : ''}>
+        <div class="de">${titulo}</div>
+        <div class="preco"><small>R$</small>${precoTxt(PRECO)}</div>
+        <span class="unico">Uma vez só · menos que um saco de ração</span>
+        <a class="btn-comprar" ${id === 'caixaPrincipal' ? 'id="comprar"' : 'data-comprar'} href="${esc(linkComprar)}">Quero proteger ${oN} agora →</a>
+        <div class="seguro"><span>🔒 Compra segura</span><span>🛡️ Garantia de 7 dias</span><span>📱 Acesso na hora</span></div>
+      </div>`;
 
-  d.innerHTML = `<div class="tsl">
+  d.innerHTML = `<div class="tsl tsl2">
+    <div class="alerta-topo">⚠ Resultado d${oN}: ${sinaisTxt}</div>
     <section style="text-align:center;align-items:center">
-      <span class="selo">✓ Diagnóstico pronto</span>
-      <h1 style="margin:6px 0 0">O plano para ${oN} viver mais anos, e anos bons</h1>
+      <h1 style="margin:2px 0 0">${O()} ${nome} já está te mostrando <span class="vm">${sinaisTxt}</span>. E ${ele()} não vai reclamar até virar emergência.</h1>
+      <p class="lead2">"Achei que era da idade." É o que quase todo dono diz, depois.</p>
     </section>
 
     <section>
@@ -821,52 +886,55 @@ function telaOferta(d) {
         </div>
         <div class="tiles">
           <div class="tile"><b>~${h}</b><span>anos em idade humana</span></div>
-          <div class="tile"><b>${String(f.vive).replace('.', ',')}</b><span>anos: a média de vida ${usaPorte() || st.racaOrigem === 'srd' ? 'do porte' : 'da raça'}</span></div>
-          <div class="tile"><b>${st.idade >= f.idosoAos ? '🕰️' : '⏳'}</b><span>${fase}</span></div>
+          <div class="tile"><b>${String(f.vive).replace('.', ',')}</b><span>anos: a média de vida ${doPorte ? 'do porte' : 'da raça'}</span></div>
+          <div class="tile alerta-t"><b>${nAt}</b><span>sina${nAt > 1 ? 'is' : 'l'} em alerta</span></div>
         </div>
       </div>
-      <div class="chips-radar"><span class="pill p-at">${nAt} em atenção</span><span class="pill p-ob">${nOb} para observar</span>${nNo ? `<span class="pill p-no">${nNo} não observado${nNo > 1 ? 's' : ''}</span>` : ''}</div>
     </section>
 
     <section>
-      <div class="compat">
-        <div class="anel-c"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--soft)" stroke-width="3.4"/><circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--accent)" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="${compat} 100"/></svg><b>${compat}%</b></div>
-        <div class="tx"><b>O Plano Vovocão é ${compat}% compatível com ${oN}</b><p>Montado com as respostas do diagnóstico.</p></div>
-      </div>
-      <ul class="checks-l">
-        <li><i>✓</i><span><b>${racaTxt}</b><small>Os cuidados e as doenças ${usaPorte() || st.racaOrigem === 'srd' ? 'do porte' : 'da raça'} já entram no plano</small></span></li>
-        <li><i>✓</i><span><b>${st.idade} anos (~${h} humanos)</b><small>Rotina no ritmo da idade ${doN}</small></span></li>
-        <li><i>✓</i><span><b>${emAtencao.length} sinal${emAtencao.length > 1 ? 'is' : ''} em atenção</b><small>${esc(emAtencao.join(' · '))}</small></span></li>
-      </ul>
+      <div class="kick vm">O que o diagnóstico encontrou</div>
+      ${atencao.map(([k, nm]) => { const m = marcou(k); return `<div class="sinal-vm"><div class="cab"><span class="ic-vm">!</span><b>${nm}</b><span class="tag">${res[k].raca ? 'Risco da raça' : 'Em alerta'}</span></div>
+        ${m ? `<div class="voce">Você marcou: <i>"${esc(m)}"</i></div>` : res[k].raca ? `<div class="voce">É um dos riscos mais conhecidos ${doPorte ? 'do porte' : 'da raça'}.</div>` : ''}
+        <p>${RISCO_SINAL[k](ele())}</p></div>`; }).join('')}
+      ${observar.length ? `<div class="obs-l"><b>Para observar:</b> ${observar.map(([, nm]) => nm).join(' · ')}</div>` : ''}
     </section>
 
     <section>
-      <div class="kick">O que mais ameaça os anos ${doN}</div>
-      ${dores.map(x => { const s = sinalDa(x.nome); const marcou = s && res[s] && res[s].st === 'atencao'; return `<div class="dor"><div class="e">${x.e}</div><div><b>${esc(x.nome)}</b>${x.dado ? `<span class="dado">${esc(x.dado)}</span>` : ''}<span class="ve">👀 Em casa: ${esc(x.sinal)}</span>${marcou ? '<span class="marcou">⚠ Você marcou este sinal</span>' : ''}</div></div>`; }).join('')}
+      <div class="tit" style="text-align:center">O plano d${oN} começa exatamente por ${nAt > 1 ? 'esses ' + nAt + ' sinais' : 'esse sinal'}.</div>
+      ${caixa('', `Plano Vovocão d${oN}`)}
+    </section>
+
+    <section>
       <div class="silencio">
         <div class="big">${Ele()} não reclama.<br>${Ele()} se adapta.</div>
-        <p>${acompanha < 7 ? `Hoje você acompanha <b class="n">${acompanha} de 7</b> sinais. Os ${7 - acompanha} que faltam são onde os problemas da idade começam escondidos.` : `Você já olha os 7 sinais. Agora falta saber o que fazer com os que pedem atenção.`}</p>
+        <p>Cachorro esconde a dor por instinto. Quando ${ele()} finalmente para de comer, de subir ou de vir te receber na porta, o problema já estava ali há meses.</p>
       </div>
     </section>
 
+    ${dores.length ? `<section>
+      <div class="kick vm">O que mais ameaça ${grupo} na idade d${oN}</div>
+      ${dores.map(x => { const s = sinalDa(x.nome); const mc = s && res[s] && res[s].st === 'atencao'; return `<div class="dor${mc ? ' quente' : ''}"><div class="e">${x.e}</div><div><b>${esc(x.nome)}</b>${x.dado ? `<span class="dado">${esc(x.dado)}</span>` : ''}<span class="ve">👀 Em casa: ${esc(x.sinal)}</span>${mc ? '<span class="marcou">⚠ Você marcou este sinal</span>' : ''}</div></div>`; }).join('')}
+    </section>` : ''}
+
     <section>
-      <div class="kick">A diferença</div>
       <div class="vs">
-        <div class="col sem"><h4>❌ Sem um plano</h4><ul><li>Descobre no exame, quando já avançou</li><li>Chama dor de "preguiça da idade"</li><li>2 da manhã, sem saber se é emergência</li></ul></div>
+        <div class="col sem"><h4>❌ Se ninguém olhar</h4><ul><li>Descobre no exame, quando já avançou</li><li>Chama dor de "preguiça da idade"</li><li>2 da manhã, sem saber se é emergência</li></ul></div>
         <div class="col com"><h4>✅ Com o Vovocão</h4><ul><li>Percebe no 1º sinal, não no último</li><li>10 min por dia contra a dor e a apatia</li><li>Sabe se dá pra esperar ou se corre</li></ul></div>
       </div>
     </section>
 
     <section>
-      <div class="kick">10 minutos por dia, 5 cuidados</div>
-      <div class="tit">O que o plano faz pel${o()} ${nome}</div>
-      <div class="cuidados">
-        <div class="cuidado"><div class="e">🦴</div><b>Mobilidade e dor</b><span>Exercícios guiados com cronômetro</span></div>
-        <div class="cuidado"><div class="e">🥣</div><b>Alimentação e água</b><span>O que muda no prato e o que ${ele()} nunca pode comer</span></div>
-        <div class="cuidado"><div class="e">💊</div><b>Remédios</b><span>Lembrete de horário e o que é veneno</span></div>
-        <div class="cuidado"><div class="e">🩺</div><b>Prevenção</b><span>${prevTxt.replace(/^./, c => c.toUpperCase())} e o mapa de caroços</span></div>
-        <div class="cuidado larga"><div class="e">🎾</div><div><b>Mente e alegria</b><span>Brincadeiras de faro para ${ele()} ter dias bons de novo</span></div></div>
-      </div>
+      <div class="kick">O que tem dentro</div>
+      <div class="tit">Tudo o que ${oN} precisa, no seu celular</div>
+      <ul class="checks-l rec">
+        <li><i>📱</i><span><b>App com o perfil d${oN}</b><small>Já montado com as respostas do diagnóstico</small></span></li>
+        <li><i>⏱️</i><span><b>Plano diário de 10 minutos</b><small>Mobilidade, alimentação, remédios, prevenção e mente, pela idade d${oN}</small></span></li>
+        <li><i>📡</i><span><b>Check-up semanal de 2 minutos</b><small>O radar mostra o que melhorou e o que piorou</small></span></li>
+        <li><i>🧭</i><span><b>+40 sinais explicados</b><small>"É da idade ou é alerta?", e ${prevTxt}</small></span></li>
+        <li><i>🚨</i><span><b>Emergência: o que fazer agora</b><small>Para as 2 da manhã de domingo</small></span></li>
+        <li><i>📄</i><span><b>Resumo para o veterinário</b><small>Chega na consulta sabendo o que contar</small></span></li>
+      </ul>
       <div class="telas">
         <img src="img/telas/01-hoje.webp" alt="Tela Hoje do app">
         <img src="img/telas/03-radar.webp" alt="Radar semanal">
@@ -877,27 +945,19 @@ function telaOferta(d) {
     </section>
 
     <section id="oferta">
-      <div class="kick">O que você recebe hoje</div>
-      <ul class="checks-l rec">
-        <li><i>📱</i><span><b>App Vovocão com o perfil ${doN}</b><small>Já montado com as respostas do diagnóstico</small></span></li>
-        <li><i>⏱️</i><span><b>Plano diário de 10 minutos</b><small>Pela raça e pela idade ${doN}</small></span></li>
-        <li><i>📡</i><span><b>Check-up semanal de 2 minutos</b><small>Com o radar: o que melhorou, o que piorou</small></span></li>
-        <li><i>🧭</i><span><b>+40 sinais explicados</b><small>"É da idade ou é alerta?"</small></span></li>
-        <li><i>🚨</i><span><b>Emergência: o que fazer agora</b><small>Para as 2 da manhã de domingo</small></span></li>
-        <li><i>📄</i><span><b>Resumo para o veterinário</b><small>Chega na consulta sabendo o que contar</small></span></li>
-      </ul>
-      <div class="oferta-box">
-        <div class="de">Plano Vovocão d${o()} ${nome}</div>
-        <div class="preco"><small>R$</small>47</div>
-        <span class="unico">Pagamento único · acesso na hora</span>
-        <a class="btn-comprar" id="comprar" href="${esc(linkComprar)}">Quero o plano d${o()} ${nome} →</a>
-        <div class="seguro"><span>🔒 Compra segura</span><span>✅ Garantia de 7 dias</span><span>📱 Abre no celular</span></div>
+      <div class="ancora">
+        <div class="lin"><span>Uma consulta com exame de sangue</span><s>R$ 300 ou mais</s></div>
+        <div class="lin"><span>Uma emergência de madrugada</span><s>muito mais</s></div>
+        <div class="lin forte"><span>O plano d${oN}, para sempre</span><b>R$ ${precoTxt(PRECO)}</b></div>
+        <p>Pagamento único. Dá menos de ${centavos} centavos por dia no primeiro ano. E não substitui o veterinário: te faz chegar nele na hora certa.</p>
       </div>
+      ${caixa('caixaPrincipal', `Plano Vovocão d${oN}`)}
+      <div class="garantia"><div class="selo-g">7<small>dias</small></div><div><b>Garantia de 7 dias, sem pergunta</b><p>Usa o plano com ${oN}. Se não gostar, pede o reembolso e recebe cada centavo de volta.</p></div></div>
     </section>
 
     <section class="faq">
       <div class="kick">Dúvidas</div>
-      <details><summary>Funciona para ${grupo}?</summary><p>Sim. O plano já vem com os cuidados e as doenças ${usaPorte() || st.racaOrigem === 'srd' ? 'do porte' : 'da raça'} e da idade ${doN}.</p></details>
+      <details><summary>Funciona para ${grupo}?</summary><p>Sim. O plano já vem com os cuidados e as doenças ${doPorte ? 'do porte' : 'da raça'} e da idade ${doN}.</p></details>
       <details><summary>Preciso baixar alguma coisa?</summary><p>Não. Abre no navegador do celular, e você pode pôr o ícone na tela inicial.</p></details>
       <details><summary>Substitui o veterinário?</summary><p>Não. Ele te ajuda a perceber os sinais cedo e a chegar na consulta na hora certa, sabendo o que contar.</p></details>
       <details><summary>E se eu não gostar?</summary><p>Você tem 7 dias de garantia: pede o reembolso e recebe o valor de volta.</p></details>
@@ -905,14 +965,15 @@ function telaOferta(d) {
 
     <section style="text-align:center">
       <div class="tit">${Ele()} não vai te avisar onde dói.<br><span style="color:var(--accent)">O Vovocão avisa.</span></div>
-      <a class="btn-comprar" href="${esc(linkComprar)}" data-comprar>Quero o plano d${o()} ${nome} →</a>
+      <p class="lead2" style="margin:0">Cada semana sem olhar é uma semana em que o sinal pode crescer sem ninguém ver.</p>
+      <a class="btn-comprar" href="${esc(linkComprar)}" data-comprar>Quero proteger ${oN} agora →</a>
     </section>
   </div>
-  <div class="fixo" id="fixo"><div class="in"><div><b>Plano d${o()} ${nome}</b>R$ 47 · pagamento único</div><a href="${esc(linkComprar)}" data-comprar>Quero</a></div></div>`;
-  d.querySelectorAll('#comprar,[data-comprar]').forEach(a => a.addEventListener('click', () => enviar('checkout_clique', 'oferta', { compat, raca: f.id })));
-  // barra fixa de compra aparece depois do perfil e some quando a caixa de preço está na tela
-  const fixo = d.querySelector('#fixo'), caixa = d.querySelector('.oferta-box');
-  const ver = () => { const r = caixa.getBoundingClientRect(); fixo.classList.toggle('on', scrollY > 420 && !(r.top < innerHeight && r.bottom > 0)); };
+  <div class="fixo" id="fixo"><div class="in"><div><b>${sinaisTxt.replace(/^./, c => c.toUpperCase())}</b>Plano d${oN} · R$ ${precoTxt(PRECO)}</div><a href="${esc(linkComprar)}" data-comprar>Quero</a></div></div>`;
+  d.querySelectorAll('#comprar,[data-comprar]').forEach(a => a.addEventListener('click', () => enviar('checkout_clique', 'oferta', { preco: PRECO, raca: f.id })));
+  // barra fixa de compra aparece depois do perfil e some quando uma caixa de preço está na tela
+  const fixo = d.querySelector('#fixo'), caixas = [...d.querySelectorAll('.oferta-box')];
+  const ver = () => { const naTela = caixas.some(c => { const r = c.getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; }); fixo.classList.toggle('on', scrollY > 420 && !naTela); };
   addEventListener('scroll', ver, { passive: true }); ver();
   armarBack();
 }
@@ -924,7 +985,7 @@ const lerLS = (k) => { try { return localStorage.getItem(k); } catch (e) { retur
 const gravarLS = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 let backArmado = false;
 function armarBack() {
-  if (backArmado || (lerLS(BACK_CHAVE) && !URLP.get('teste'))) return; backArmado = true;
+  if (backArmado || (lerLS(BACK_CHAVE) && !URLP.get('teste') && !REVISAO_TSL)) return; backArmado = true;
   try { history.pushState({ vovocaoBack: 1 }, '', location.href); } catch (e) { return; }
   addEventListener('popstate', function aoVoltar() { removeEventListener('popstate', aoVoltar); telaBack(); });
 }
@@ -955,7 +1016,7 @@ function telaBack() {
     <section>
       <div class="oferta-box urg">
         <div class="tag-unica">OFERTA ÚNICA · SÓ NESTA PÁGINA</div>
-        <div class="de">De <s>R$ 47</s> por</div>
+        <div class="de">De <s>R$ ${precoTxt(PRECO)}</s> por</div>
         <div class="preco"><small>R$</small>19,90</div>
         <span class="unico">Pagamento único · o mesmo plano completo</span>
         <div class="relogio" id="relogio">Esse valor some em <b id="rel">${BACK_MIN}:00</b></div>
@@ -988,9 +1049,9 @@ function telaBack() {
     rel.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
     if (s) return;
     clearInterval(tic);
-    app.querySelector('#relogio').innerHTML = '<b>Oferta de R$ 19,90 encerrada.</b> O plano continua por R$ 47.';
-    app.querySelectorAll('#comprarBack,[data-comprar-back]').forEach(a => { a.href = linkCheio; a.textContent = `Quero o plano d${oN} por R$ 47 →`; });
-    app.querySelector('.preco').innerHTML = '<small>R$</small>47'; app.querySelector('.de').textContent = 'Preço normal';
+    app.querySelector('#relogio').innerHTML = `<b>Oferta de R$ 19,90 encerrada.</b> O plano continua por R$ ${precoTxt(PRECO)}.`;
+    app.querySelectorAll('#comprarBack,[data-comprar-back]').forEach(a => { a.href = linkCheio; a.textContent = `Quero o plano d${oN} por R$ ${precoTxt(PRECO)} →`; });
+    app.querySelector('.preco').innerHTML = '<small>R$</small>' + precoTxt(PRECO); app.querySelector('.de').textContent = 'Preço normal';
   };
   const tic = setInterval(passo, 1000); passo();
 }
@@ -1003,6 +1064,23 @@ if (URLP.get('teste')) {
   st.resp = { 'sinal:apetite:x': 'observar', 'sinal:agua:x': 'atencao', 'sinal:patas:x': 'observar', 'sinal:noite:x': 'nao', 'sinal:boca:x': 'observar', 'sinal:respiracao:x': 'observar', 'sinal:caroco:x': 'nao' };
   { const r = calcularRadar(); salvarPerfil(r.res, r.acompanha); }
   pos = E.findIndex(e => e.id === URLP.get('tela') || e.id === 'oferta');
+}
+// /tsl: abre a TSL com as respostas reais de um lead de 24/11 (Yorkshire, macho, 11 anos). O nome não é guardado no painel: "Thor".
+const LEAD_TSL = { ficha: 'yorkshire', nome: 'Thor', idade: 11, sexo: 'm', resp: [['porta', 'Sempre, com festa'], ['sono', 'Bem mais, quase o dia todo'], ['apetite', 'Ficou mais chato pra comer'],
+  ['agua', 'Normal, como sempre'], ['patas', ['Não sobe mais no sofá ou na cama']], ['noite', 'Não'], ['caroco', 'Não'], ['gengiva', 'Mais clara, meio pálida'], ['animo', 'Mais quieto, mas ainda brinca']] };
+function aplicarLead(L) {
+  st.ficha = F[L.ficha] || F['srd-medio']; st.racaOrigem = L.ficha.startsWith('srd') ? 'srd' : 'botao'; st.porte = st.ficha.porte;
+  st.racaRotulo = L.ficha.startsWith('srd') ? '' : st.ficha.curto; st.nome = URLP.get('nome') || L.nome; st.idade = +URLP.get('idade') || L.idade; st.sexo = URLP.get('sexo') || L.sexo; st.resp = {};
+  for (const [id, r] of L.resp) {
+    const i = E.findIndex(x => x.id === id); if (i < 0) continue; pos = i; const e = E[i], ops = e.op();
+    if (Array.isArray(r)) { const sel = ops.filter(x => r.includes(x.t)); st.resp[id] = sel.map(x => x.t).join(' | '); if (e.efeito) aplicar(e.efeito(sel)); }
+    else { const op = ops.find(x => x.t === r); if (!op) continue; st.resp[id] = op.t; aplicar(op.s); }
+  }
+}
+if (REVISAO_TSL && !URLP.get('teste')) {
+  aplicarLead(LEAD_TSL);
+  { const r = calcularRadar(); salvarPerfil(r.res, r.acompanha); }
+  pos = E.findIndex(e => e.id === 'oferta');
 }
 mostrar();
 })();
